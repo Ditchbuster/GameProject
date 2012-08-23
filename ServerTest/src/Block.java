@@ -1,0 +1,12 @@
+
+public class Block {
+	int type;
+
+	public Block(int type) {
+		this.type = type;
+	}
+	public Block(){
+		type=1; //solid TODO define types;
+	}
+	
+}
