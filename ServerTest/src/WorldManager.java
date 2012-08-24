@@ -1,6 +1,5 @@
 import java.util.ArrayList;
 
-
 public class WorldManager {
 	private ArrayList<Clump> world; //list of all Clumps
 
