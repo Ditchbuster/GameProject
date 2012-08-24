@@ -28,6 +28,7 @@ public class SimpleServerTest {
 		              try {
 						while( (line = in.readLine()) != null ) {
 						      if( "exit".equals(line) ) {
+						    	  System.out.println("Exiting");
 						          break;
 						      }
 						  }
