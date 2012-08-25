@@ -1,4 +1,6 @@
 import java.io.IOException;
+import java.util.Arrays;
+
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.plugins.FileLocator;
 import com.jme3.material.Material;
@@ -83,6 +85,7 @@ public class SimpleClientTest extends SimpleApplication{
         // Doing it here means that the client code only needs to
         // call our initialize. 
         Serializer.registerClass(ChatMessage.class);
+        Serializer.registerClass(ClumpMessage.class);
     }
     
     @Serializable
@@ -118,6 +121,45 @@ public class SimpleClientTest extends SimpleApplication{
         public String toString() {
             return name + ":" + message;
         }
+    }
+    @Serializable
+    public static class ClumpMessage extends AbstractMessage {
+    	private int id;
+    	private int size;
+    	private int[][][] blocks;
+
+    	
+    	public ClumpMessage() {
+		}
+		public ClumpMessage(int id, int size, int[][][] blocks) {
+			this.id = id;
+			this.size = size;
+			this.blocks = blocks;
+		}
+		public int getSize() {
+    		return size;
+    	}
+    	public void setSize(int size) {
+    		this.size = size;
+    	}
+    	public int getId() {
+    		return id;
+    	}
+    	public void setId(int id) {
+    		this.id = id;
+    	}
+    	public int[][][] getBlocks() {
+    		return blocks;
+    	}
+    	public void setBlocks(int[][][] blocks) {
+    		this.blocks = blocks;
+    	}
+		@Override
+		public String toString() {
+			return "ClumpMessage [id=" + id + ", size=" + size + ", blocks="
+					+ Arrays.toString(blocks) + "]";
+		}
+    	 
     }
     private class ChatHandler implements MessageListener<Client> {
 
