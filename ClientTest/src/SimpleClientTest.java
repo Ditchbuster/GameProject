@@ -1,5 +1,7 @@
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.plugins.FileLocator;
@@ -157,8 +159,17 @@ public class SimpleClientTest extends SimpleApplication{
     	}
 		@Override
 		public String toString() {
+			String temp="";
+			for(int i=0; i<size;i++){
+				for(int j =0; j<size;j++){
+					for(int k =0; k<size;k++){
+						temp+=" "+blocks[i][j][k]; 
+					}
+					temp+=":";
+				}temp+=": ";
+			}
 			return "ClumpMessage [id=" + id + ", size=" + size + ", blocks="
-					+ Arrays.toString(blocks) + "]";
+					+ temp + "]";
 		}
     	 
     }
