@@ -3,6 +3,9 @@ import java.util.ArrayList;
 public class WorldManager {
 	private ArrayList<Clump> world; //list of all Clumps
 
+	/**
+	 * Currently inits a default flat area of a certain size
+	 */
 	public WorldManager() {
 		world = new ArrayList<Clump>(100); // init the list of clumps
 		initFlatWorld();
@@ -17,5 +20,11 @@ public class WorldManager {
 		}
 	}
 	
+	public ArrayList<Clump> getWorld(){
+		return world;
+	}
+	public Clump getClump(int i){
+		return world.get(i);
+	}
 	
 }
