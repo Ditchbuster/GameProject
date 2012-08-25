@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 
 import com.jme3.network.*;
 import com.jme3.network.serializing.Serializable;
@@ -20,7 +21,10 @@ public class SimpleServerTest {
 	public static void main(String[] args) throws IOException
 	{
 		Serializer.registerClass(ChatMessage.class);
+		Serializer.registerClass(ClumpMessage.class);
 		final Server Server = Network.createServer(6143);
+		conHandler conH = new conHandler();
+		Server.addConnectionListener(conH);
 		Runnable main = new Runnable()
 		{
 			@Override
@@ -29,6 +33,7 @@ public class SimpleServerTest {
 				Server.start();
 				ChatHandler handler = new ChatHandler();
 		        Server.addMessageListener(handler, ChatMessage.class);
+		        
 		        
 				BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 				String line = null;
@@ -49,9 +54,26 @@ public class SimpleServerTest {
 			}
 		};
 		WorldManager world = new WorldManager();
+		
 		new Thread(main).start();
 
 
+	}
+	
+	private static class conHandler implements ConnectionListener {
+
+		@Override
+		public void connectionAdded(Server arg0, HostedConnection arg1) {
+			// TODO Auto-generated method stub
+			System.out.println("Connection added!");
+		}
+
+		@Override
+		public void connectionRemoved(Server arg0, HostedConnection arg1) {
+			// TODO Auto-generated method stub
+			
+		}
+		
 	}
 	
 	private static class ChatHandler implements MessageListener<HostedConnection> {
@@ -110,6 +132,45 @@ public class SimpleServerTest {
 	        public String toString() {
 	            return name + ":" + message;
 	        }
+	    }
+	 @Serializable
+	    public static class ClumpMessage extends AbstractMessage {
+	    	private int id;
+	    	private int size;
+	    	private int[][][] blocks;
+
+	    	
+	    	public ClumpMessage() {
+			}
+			public ClumpMessage(int id, int size, int[][][] blocks) {
+				this.id = id;
+				this.size = size;
+				this.blocks = blocks;
+			}
+			public int getSize() {
+	    		return size;
+	    	}
+	    	public void setSize(int size) {
+	    		this.size = size;
+	    	}
+	    	public int getId() {
+	    		return id;
+	    	}
+	    	public void setId(int id) {
+	    		this.id = id;
+	    	}
+	    	public int[][][] getBlocks() {
+	    		return blocks;
+	    	}
+	    	public void setBlocks(int[][][] blocks) {
+	    		this.blocks = blocks;
+	    	}
+			@Override
+			public String toString() {
+				return "ClumpMessage [id=" + id + ", size=" + size + ", blocks="
+						+ Arrays.toString(blocks) + "]";
+			}
+	    	 
 	    }
 	}
 
