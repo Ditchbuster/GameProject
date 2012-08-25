@@ -9,4 +9,7 @@ public class Block {
 		type=1; //solid TODO define types;
 	}
 	
+	public int getType(){
+		return type;
+	}
 }

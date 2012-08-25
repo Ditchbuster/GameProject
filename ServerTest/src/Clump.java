@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Clump {
 	static AtomicInteger nextId = new AtomicInteger(); //used for creating a unique id
 	private int id;
-	static int size = 3; // how many blocks are along axis ie 3 = 3x3x3
+	static final int size = 3; // how many blocks are along axis ie 3 = 3x3x3
 	//int type; // type of the block; for now 0= air 1= solid
 	int x,y,z; //position data of the 0,0,0 child
 	Block[][][] child;
@@ -48,8 +48,10 @@ public class Clump {
 	public int getId() {
 		return id;
 	}
-
 	
+	public Block getBlock(int x, int y, int z){
+		return child[x][y][z];
+	}
 
 	
 }

@@ -11,7 +11,7 @@ import com.jme3.network.serializing.Serializer;
 
 public class SimpleServerTest {
 	
-	
+	static WorldManager world = new WorldManager();
 	
 	/**
 	 * @param args
@@ -53,7 +53,7 @@ public class SimpleServerTest {
 				}
 			}
 		};
-		WorldManager world = new WorldManager();
+		
 		
 		new Thread(main).start();
 
@@ -64,8 +64,20 @@ public class SimpleServerTest {
 
 		@Override
 		public void connectionAdded(Server arg0, HostedConnection arg1) {
-			// TODO Auto-generated method stub
+			// TODO Optomize how to send the blocks or clumps to the client
 			System.out.println("Connection added!");
+			Clump temp = world.getClump(0);
+			int[][][] blocks= new int[Clump.size][Clump.size][Clump.size];
+			for(int i=0; i<Clump.size;i++){
+				for(int j =0; j<Clump.size;j++){
+					for(int k =0; k<Clump.size;k++){
+						blocks[i][j][k] = temp.getBlock(i, j, k).getType();
+					}
+				}
+			}
+			ClumpMessage clumpmess = new ClumpMessage(world.getClump(0).getId(),Clump.size,blocks);
+			arg1.send(clumpmess);
+			
 		}
 
 		@Override

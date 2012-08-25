@@ -56,6 +56,7 @@ public class SimpleClientTest extends SimpleApplication{
 		try {
 			myClient = Network.connectToServer("localhost", 6143);
 			myClient.addMessageListener(new ChatHandler(), ChatMessage.class);
+			myClient.addMessageListener(new ClumpHandler(), ClumpMessage.class);
 			myClient.start();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -168,6 +169,17 @@ public class SimpleClientTest extends SimpleApplication{
         	ChatMessage chat = (ChatMessage) m;
 
             System.out.println("Received:" + chat);
+        	}
+           
+        }
+    }
+    private class ClumpHandler implements MessageListener<Client> {
+
+        public void messageReceived(Client source, Message m) {
+        	if (m instanceof ClumpMessage) {
+        	ClumpMessage clump = (ClumpMessage) m;
+
+            System.out.println("Received:" + clump);
         	}
            
         }
