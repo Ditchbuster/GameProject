@@ -18,17 +18,23 @@ import com.jme3.network.serializing.Serializer;
 import com.jme3.post.FilterPostProcessor;
 import com.jme3.post.filters.CartoonEdgeFilter;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.Node;
 import com.jme3.scene.shape.Box;
 import com.jme3.system.JmeContext;
 
 public class SimpleClientTest extends SimpleApplication{
-
+	/* Debug */
+	boolean d_wireframe = true;
+	
+	
+	public Clump [][] twodworld;
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		SimpleClientTest app = new SimpleClientTest();
+		
 		app.start(JmeContext.Type.Display);
 	}
 
@@ -39,22 +45,23 @@ public class SimpleClientTest extends SimpleApplication{
 		FilterPostProcessor fpp=new FilterPostProcessor(assetManager);
 		fpp.addFilter(new CartoonEdgeFilter());
 		viewPort.addProcessor(fpp);
-		// TODO Auto-generated method stub
+		// TODO get settings from server so not hard coded
+		/*int size = 3;
+		this.twodworld = new Clump[size][size];
+		for (int i=0;i<size;i++){
+			for (int j=0;j<size;j++){
+				twodworld[i][j]=new Clump(i,j,0);
+			}
+		}*/
+		
+		
 		Client myClient = null;
 		initializeClasses();
 		this.assetManager.registerLocator("assets/", FileLocator.class);
 		viewPort.setBackgroundColor(new ColorRGBA(0.7f, 0.8f, 1f, 1f));		
-		flyCam.setMoveSpeed(100);
-		Box b = new Box(Vector3f.ZERO, 1, 1, 1);
-		Geometry geom = new Geometry("Box", b);
-		Material mat = new Material(assetManager,"Common/MatDefs/Misc/Unshaded.j3md");
-		mat.setColor("Color", ColorRGBA.Blue);
-		geom.setMaterial(mat);
-		//mat.getAdditionalRenderState().setWireframe(true);
-		geom.setLocalTranslation(0, 0, 0);
-		rootNode.attachChild(geom);
+		flyCam.setMoveSpeed(50);
 		
-		
+	
 		try {
 			myClient = Network.connectToServer("localhost", 6143);
 			myClient.addMessageListener(new ChatHandler(), ChatMessage.class);
@@ -84,6 +91,28 @@ public class SimpleClientTest extends SimpleApplication{
 		//bulletAppState.getPhysicsSpace().add(floor_phy);
 		
 	}
+	public void fillNode(Node parent, Clump in){
+		Box b = new Box(Vector3f.ZERO, 1, 1, 1);
+		Geometry[][][] geom = new Geometry[Clump.size][Clump.size][Clump.size];
+		Material mat = new Material(assetManager,"Common/MatDefs/Misc/Unshaded.j3md");
+		mat.setColor("Color", ColorRGBA.Blue);
+		if(d_wireframe){
+		mat.getAdditionalRenderState().setWireframe(true);}
+		for(int i =0; i<Clump.size;i++){
+			for(int j =0; j<Clump.size;j++){
+				for(int k =0; k<Clump.size;k++){
+					geom[i][j][k]=new Geometry(String.valueOf(i)+" "+String.valueOf(j)+" "+String.valueOf(k),b);
+					geom[i][j][k].setMaterial(mat);
+					geom[i][j][k].setLocalTranslation(i*2, j*2, k*2);
+					parent.attachChild(geom[i][j][k]);
+				}
+			}
+		}
+	}
+	
+	
+	/* ****************************************Server Shit***************************************/
+	
 	public static void initializeClasses() {
         // Doing it here means that the client code only needs to
         // call our initialize. 
@@ -189,7 +218,7 @@ public class SimpleClientTest extends SimpleApplication{
         public void messageReceived(Client source, Message m) {
         	if (m instanceof ClumpMessage) {
         	ClumpMessage clump = (ClumpMessage) m;
-
+        	fillNode(rootNode,new Clump(0,0,0,clump.blocks));
             System.out.println("Received:" + clump);
         	}
            

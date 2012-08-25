@@ -44,6 +44,29 @@ public class Clump {
 			
 		}
 	}
+	public Clump(int x,int y, int z, int id) { // used for creating a clump that has been created before
+		this.id =id;
+		this.x =x;
+		this.y =y;
+		this.z =z;
+		child = null;
+	}
+
+	public Clump(int x, int y, int z, int[][][] blocks) {
+		this.id =nextId.incrementAndGet();
+		this.x =x;
+		this.y =y;
+		this.z =z;
+		child = new Block[size][size][size];
+		for(int i =0; i< size; i++ ){
+			for(int j =0; j< size; j++ ){
+				for(int k =0; k< size; k++ ){
+					child[i][j][k] = new Block(blocks[i][j][k]);
+				}
+			}
+			
+		}
+	}
 
 	public int getId() {
 		return id;

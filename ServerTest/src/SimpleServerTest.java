@@ -66,16 +66,16 @@ public class SimpleServerTest {
 
 		@Override
 		public void connectionAdded(Server arg0, HostedConnection arg1) {
-			// TODO Optomize how to send the blocks or clumps to the client
+			// TODO Optimize how to send the blocks or clumps to the client
 			System.out.println("Connection added!");
 			Clump temp = world.getClump(0);
 			int[][][] blocks= new int[Clump.size][Clump.size][Clump.size];
-			 Logger.getLogger(SimpleServerTest.class.getName()).log(Level.INFO, "Starting block sending:");
+			 Logger.getLogger(SimpleServerTest.class.getName()).log(Level.INFO, "Starting block sending");
 			for(int i=0; i<Clump.size;i++){
 				for(int j =0; j<Clump.size;j++){
 					for(int k =0; k<Clump.size;k++){
 						blocks[i][j][k] = temp.getBlock(i, j, k).getType();
-						Logger.getLogger(SimpleServerTest.class.getName()).log(Level.INFO, "{0}",blocks[i][j][k]);
+						
 					}
 				}
 			}
