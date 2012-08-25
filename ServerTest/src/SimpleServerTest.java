@@ -19,7 +19,7 @@ public class SimpleServerTest {
 		
 	public static void main(String[] args) throws IOException
 	{
-		initializeClasses();
+		Serializer.registerClass(ChatMessage.class);
 		final Server Server = Network.createServer(6143);
 		Runnable main = new Runnable()
 		{
@@ -54,12 +54,6 @@ public class SimpleServerTest {
 
 	}
 	
-	public static void initializeClasses() {
-        // Doing it here means that the client code only needs to
-        // call our initialize. 
-        Serializer.registerClass(ChatMessage.class);
-    }
-
 	private static class ChatHandler implements MessageListener<HostedConnection> {
 
         public ChatHandler() {
