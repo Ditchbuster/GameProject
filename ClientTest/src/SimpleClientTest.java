@@ -101,10 +101,12 @@ public class SimpleClientTest extends SimpleApplication{
 		for(int i =0; i<Clump.size;i++){
 			for(int j =0; j<Clump.size;j++){
 				for(int k =0; k<Clump.size;k++){
+					if(in.getBlock(i, j, k).getType()==1){
 					geom[i][j][k]=new Geometry(String.valueOf(i)+" "+String.valueOf(j)+" "+String.valueOf(k),b);
 					geom[i][j][k].setMaterial(mat);
 					geom[i][j][k].setLocalTranslation(i*2, j*2, k*2);
 					parent.attachChild(geom[i][j][k]);
+					}
 				}
 			}
 		}

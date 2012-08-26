@@ -1,3 +1,4 @@
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -12,6 +13,9 @@ public class Clump {
 	//int type; // type of the block; for now 0= air 1= solid
 	int x,y,z; //position data of the 0,0,0 child
 	Block[][][] child;
+	public static enum type {
+		RANDOM,SOLID;
+	}
 	
 	/**
 	 * Default constructor
@@ -43,6 +47,34 @@ public class Clump {
 			}
 			
 		}
+	}
+	public Clump(int x,int y, int z, type t) { // create clump at location with all solid
+		this.id =nextId.incrementAndGet();
+		this.x =x;
+		this.y =y;
+		this.z =z;
+		child = new Block[size][size][size];
+		Random ranGen = null;
+		
+		if(t==type.RANDOM){
+			ranGen = new Random();
+		}
+		
+			for(int i =0; i< size; i++ ){
+				for(int j =0; j< size; j++ ){
+					for(int k =0; k< size; k++ ){
+						if(t==type.SOLID){
+						child[i][j][k] = new Block();
+						}else if (t==type.RANDOM){
+							child[i][j][k]=new Block(ranGen.nextInt(2)); // creates 1 or 0
+						}
+					}
+				}
+			}
+		
+			
+		
+		
 	}
 	public Clump(int x,int y, int z, int id) { // used for creating a clump that has been created before
 		this.id =id;
