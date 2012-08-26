@@ -1,6 +1,8 @@
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.jme3.math.Vector3f;
+
 
 /**
  * @author CPearson
@@ -14,7 +16,7 @@ public class Clump {
 	int x,y,z; //position data of the 0,0,0 child
 	Block[][][] child;
 	public static enum type {
-		RANDOM,SOLID;
+		RANDOM,SOLID,AIR,NULL;
 	}
 	
 	/**
@@ -106,6 +108,11 @@ public class Clump {
 	
 	public Block getBlock(int x, int y, int z){
 		return child[x][y][z];
+	}
+
+	public Vector3f getPos() {
+		
+		return new Vector3f(x,y,z);
 	}
 
 	

@@ -24,7 +24,7 @@ import com.jme3.system.JmeContext;
 
 public class SimpleClientTest extends SimpleApplication{
 	/* Debug */
-	boolean d_wireframe = true;
+	boolean d_wireframe = false;
 	
 	
 	public Clump [][] twodworld;
@@ -72,6 +72,11 @@ public class SimpleClientTest extends SimpleApplication{
 			e.printStackTrace();
 		}
 		
+	}
+	@Override
+	public void destroy(){
+		super.destroy();
+		System.exit(0);
 	}
 	public void initFloor() {
 		//RigidBodyControl floor_phy;
@@ -161,14 +166,15 @@ public class SimpleClientTest extends SimpleApplication{
     	private int id;
     	private int size;
     	private int[][][] blocks;
-
+    	Vector3f pos;
     	
     	public ClumpMessage() {
 		}
-		public ClumpMessage(int id, int size, int[][][] blocks) {
+		public ClumpMessage(int id, int size,Vector3f pos, int[][][] blocks) {
 			this.id = id;
 			this.size = size;
 			this.blocks = blocks;
+			this.pos = pos;
 		}
 		public int getSize() {
     		return size;
@@ -220,7 +226,9 @@ public class SimpleClientTest extends SimpleApplication{
         public void messageReceived(Client source, Message m) {
         	if (m instanceof ClumpMessage) {
         	ClumpMessage clump = (ClumpMessage) m;
-        	fillNode(rootNode,new Clump(0,0,0,clump.blocks));
+        	Node temp = new Node((String.valueOf(clump.getId())));
+        	fillNode(temp,new Clump(0,0,0,clump.blocks));
+        	rootNode.attachChild(temp);
             System.out.println("Received:" + clump);
         	}
            

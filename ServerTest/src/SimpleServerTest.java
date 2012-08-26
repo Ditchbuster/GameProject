@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.jme3.math.Vector3f;
 import com.jme3.network.*;
 import com.jme3.network.serializing.Serializable;
 import com.jme3.network.serializing.Serializer;
@@ -13,7 +14,7 @@ import com.jme3.network.serializing.Serializer;
 
 public class SimpleServerTest {
 	
-	static WorldManager world = new WorldManager();
+	static WorldManager world = new WorldManager(Clump.type.RANDOM);
 	
 	/**
 	 * @param args
@@ -79,7 +80,8 @@ public class SimpleServerTest {
 					}
 				}
 			}
-			ClumpMessage clumpmess = new ClumpMessage(world.getClump(0).getId(),Clump.size,blocks);
+			Clump clumpSend = world.getClump(0);
+			ClumpMessage clumpmess = new ClumpMessage(clumpSend.getId(),Clump.size,clumpSend.getPos(),blocks);
 			arg1.send(clumpmess);
 			
 		}
@@ -154,14 +156,15 @@ public class SimpleServerTest {
 	    	private int id;
 	    	private int size;
 	    	private int[][][] blocks;
-
+	    	Vector3f pos;
 	    	
 	    	public ClumpMessage() {
 			}
-			public ClumpMessage(int id, int size, int[][][] blocks) {
+			public ClumpMessage(int id, int size,Vector3f pos, int[][][] blocks) {
 				this.id = id;
 				this.size = size;
 				this.blocks = blocks;
+				this.pos = pos;
 			}
 			public int getSize() {
 	    		return size;
