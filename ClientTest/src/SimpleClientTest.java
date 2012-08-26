@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,6 +20,7 @@ import com.jme3.post.FilterPostProcessor;
 import com.jme3.post.filters.CartoonEdgeFilter;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.system.JmeContext;
 
@@ -97,24 +99,25 @@ public class SimpleClientTest extends SimpleApplication{
 		
 	}
 	public void fillNode(Node parent, Clump in){
-		Box b = new Box(Vector3f.ZERO, 1, 1, 1);
+		Box b = new Box(.5f, .5f, .5f);
 		Geometry[][][] geom = new Geometry[Clump.size][Clump.size][Clump.size];
 		Material mat = new Material(assetManager,"Common/MatDefs/Misc/Unshaded.j3md");
-		mat.setColor("Color", ColorRGBA.Blue);
+		mat.setColor("Color", ColorRGBA.randomColor());
 		if(d_wireframe){
 		mat.getAdditionalRenderState().setWireframe(true);}
 		for(int i =0; i<Clump.size;i++){
 			for(int j =0; j<Clump.size;j++){
 				for(int k =0; k<Clump.size;k++){
 					if(in.getBlock(i, j, k).getType()==1){
-					geom[i][j][k]=new Geometry(String.valueOf(i)+" "+String.valueOf(j)+" "+String.valueOf(k),b);
+					geom[i][j][k]=new Geometry("Box "+ String.valueOf(i)+" "+String.valueOf(j)+" "+String.valueOf(k),b);
 					geom[i][j][k].setMaterial(mat);
-					geom[i][j][k].setLocalTranslation(i*2, j*2, k*2);
+					geom[i][j][k].setLocalTranslation(i, j, k);
 					parent.attachChild(geom[i][j][k]);
 					}
 				}
 			}
 		}
+		parent.setLocalTranslation(in.getPos()); // set the node offset in the world
 	}
 	
 	
@@ -194,6 +197,12 @@ public class SimpleClientTest extends SimpleApplication{
     	public void setBlocks(int[][][] blocks) {
     		this.blocks = blocks;
     	}
+		public Vector3f getPos() {
+			return pos;
+		}
+		public void setPos(Vector3f pos) {
+			this.pos = pos;
+		}
 		@Override
 		public String toString() {
 			String temp="";
@@ -225,13 +234,20 @@ public class SimpleClientTest extends SimpleApplication{
 
         public void messageReceived(Client source, Message m) {
         	if (m instanceof ClumpMessage) {
-        	ClumpMessage clump = (ClumpMessage) m;
-        	Node temp = new Node((String.valueOf(clump.getId())));
-        	fillNode(temp,new Clump(0,0,0,clump.blocks));
-        	rootNode.attachChild(temp);
-            System.out.println("Received:" + clump);
+        		final ClumpMessage clump = (ClumpMessage) m;
+        		enqueue(new Callable<Object>() {
+
+        			public Object call() throws Exception {
+
+        				Node temp = new Node(("Node "+String.valueOf(clump.getId())));
+        				fillNode(temp,new Clump(clump.getPos(),clump.blocks));
+        				rootNode.attachChild(temp);
+        				return null;
+        			}
+        		});
+        		System.out.println("Received:" + clump);
         	}
-           
+
         }
     }
 

@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -71,19 +72,21 @@ public class SimpleServerTest {
 			System.out.println("Connection added!");
 			Clump temp = world.getClump(0);
 			int[][][] blocks= new int[Clump.size][Clump.size][Clump.size];
-			 Logger.getLogger(SimpleServerTest.class.getName()).log(Level.INFO, "Starting block sending");
-			for(int i=0; i<Clump.size;i++){
-				for(int j =0; j<Clump.size;j++){
-					for(int k =0; k<Clump.size;k++){
-						blocks[i][j][k] = temp.getBlock(i, j, k).getType();
-						
-					}
-				}
-			}
-			Clump clumpSend = world.getClump(0);
-			ClumpMessage clumpmess = new ClumpMessage(clumpSend.getId(),Clump.size,clumpSend.getPos(),blocks);
-			arg1.send(clumpmess);
-			
+			 Logger.getLogger(SimpleServerTest.class.getName()).log(Level.INFO, "Starting world sending");
+			 for(Iterator<Clump> iClump = world.getWorld().iterator();iClump.hasNext();){
+				 temp = iClump.next();
+				 for(int i=0; i<Clump.size;i++){
+					 for(int j =0; j<Clump.size;j++){
+						 for(int k =0; k<Clump.size;k++){
+							 blocks[i][j][k] = temp.getBlock(i, j, k).getType();
+
+						 }
+					 }
+				 }
+				 ClumpMessage clumpmess = new ClumpMessage(temp.getId(),Clump.size,temp.getPos(),blocks);
+				 arg1.send(clumpmess);
+			 }
+			 Logger.getLogger(SimpleServerTest.class.getName()).log(Level.INFO, "Finished finished sending");
 		}
 
 		@Override
@@ -184,6 +187,12 @@ public class SimpleServerTest {
 	    	public void setBlocks(int[][][] blocks) {
 	    		this.blocks = blocks;
 	    	}
+	    	public Vector3f getPos() {
+				return pos;
+			}
+			public void setPos(Vector3f pos) {
+				this.pos = pos;
+			}
 			@Override
 			public String toString() {
 				return "ClumpMessage [id=" + id + ", size=" + size + ", blocks="

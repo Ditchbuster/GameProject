@@ -12,8 +12,9 @@ public class Clump {
 	static AtomicInteger nextId = new AtomicInteger(); //used for creating a unique id
 	private int id;
 	static final int size = 3; // how many blocks are along axis ie 3 = 3x3x3
+	
 	//int type; // type of the block; for now 0= air 1= solid
-	int x,y,z; //position data of the 0,0,0 child
+	float x,y,z; //position data of the 0,0,0 child
 	Block[][][] child;
 	public static enum type {
 		RANDOM,SOLID,AIR,NULL;
@@ -91,6 +92,22 @@ public class Clump {
 		this.x =x;
 		this.y =y;
 		this.z =z;
+		child = new Block[size][size][size];
+		for(int i =0; i< size; i++ ){
+			for(int j =0; j< size; j++ ){
+				for(int k =0; k< size; k++ ){
+					child[i][j][k] = new Block(blocks[i][j][k]);
+				}
+			}
+			
+		}
+	}
+
+	public Clump(Vector3f pos, int[][][] blocks) {
+		this.id =nextId.incrementAndGet();
+		this.x =pos.getX();
+		this.y =pos.getY();
+		this.z =pos.getZ();
 		child = new Block[size][size][size];
 		for(int i =0; i< size; i++ ){
 			for(int j =0; j< size; j++ ){

@@ -20,7 +20,7 @@ public class WorldManager {
 			int size = 3; //how many clumps in each x and y to go
 			for(int i = 0; i< size;i++){
 				for(int j = 0; j< size;j++){
-					world.add(new Clump(i*Clump.size,j*Clump.size,0,t)); //create clumps based on clump.type
+					world.add(new Clump(i*Clump.size,0,j*Clump.size,t)); //create clumps based on clump.type
 				}
 			}
 		}
