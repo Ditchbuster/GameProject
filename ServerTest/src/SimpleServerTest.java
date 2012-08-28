@@ -13,6 +13,8 @@ import com.jme3.network.serializing.Serializer;
 
 
 
+
+
 public class SimpleServerTest {
 	
 	static WorldManager world = new WorldManager(Clump.type.RANDOM);
@@ -24,8 +26,8 @@ public class SimpleServerTest {
 		
 	public static void main(String[] args) throws IOException
 	{
-		Serializer.registerClass(ChatMessage.class);
-		Serializer.registerClass(ClumpMessage.class);
+		Serializer.registerClass( GameMessage.ChatMessage.class);
+		Serializer.registerClass( GameMessage.ClumpMessage.class);
 		final Server Server = Network.createServer(6143);
 		conHandler conH = new conHandler();
 		Server.addConnectionListener(conH);
@@ -36,7 +38,7 @@ public class SimpleServerTest {
 			{
 				Server.start();
 				ChatHandler handler = new ChatHandler();
-		        Server.addMessageListener(handler, ChatMessage.class);
+		        Server.addMessageListener(handler, GameMessage.ChatMessage.class);
 		        
 		        
 				BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
@@ -83,7 +85,7 @@ public class SimpleServerTest {
 						 }
 					 }
 				 }
-				 ClumpMessage clumpmess = new ClumpMessage(temp.getId(),Clump.size,temp.getPos(),blocks);
+				 GameMessage.ClumpMessage clumpmess = new  GameMessage.ClumpMessage(temp.getId(),Clump.size,temp.getPos(),blocks);
 				 arg1.send(clumpmess);
 			 }
 			 Logger.getLogger(SimpleServerTest.class.getName()).log(Level.INFO, "Finished finished sending");
@@ -103,11 +105,11 @@ public class SimpleServerTest {
         }
 
         public void messageReceived(HostedConnection source, Message m) {
-            if (m instanceof ChatMessage) {
+            if (m instanceof GameMessage.ChatMessage) {
                 // Keep track of the name just in case we 
                 // want to know it for some other reason later and it's
                 // a good example of session data
-                source.setAttribute("name", ((ChatMessage) m).getName());
+                source.setAttribute("name", ((GameMessage.ChatMessage) m).getName());
 
                 System.out.println("Broadcasting:" + m + "  reliable:" + m.isReliable());
 
@@ -120,86 +122,7 @@ public class SimpleServerTest {
         }
     }
 	
-	 @Serializable
-	    public static class ChatMessage extends AbstractMessage {
-
-	        private String name;
-	        private String message;
-
-	        public ChatMessage() {
-	        }
-
-	        public ChatMessage(String name, String message) {
-	            setName(name);
-	            setMessage(message);
-	        }
-
-	        public void setName(String name) {
-	            this.name = name;
-	        }
-
-	        public String getName() {
-	            return name;
-	        }
-
-	        public void setMessage(String s) {
-	            this.message = s;
-	        }
-
-	        public String getMessage() {
-	            return message;
-	        }
-
-	        public String toString() {
-	            return name + ":" + message;
-	        }
-	    }
-	 @Serializable
-	    public static class ClumpMessage extends AbstractMessage {
-	    	private int id;
-	    	private int size;
-	    	private int[][][] blocks;
-	    	Vector3f pos;
-	    	
-	    	public ClumpMessage() {
-			}
-			public ClumpMessage(int id, int size,Vector3f pos, int[][][] blocks) {
-				this.id = id;
-				this.size = size;
-				this.blocks = blocks;
-				this.pos = pos;
-			}
-			public int getSize() {
-	    		return size;
-	    	}
-	    	public void setSize(int size) {
-	    		this.size = size;
-	    	}
-	    	public int getId() {
-	    		return id;
-	    	}
-	    	public void setId(int id) {
-	    		this.id = id;
-	    	}
-	    	public int[][][] getBlocks() {
-	    		return blocks;
-	    	}
-	    	public void setBlocks(int[][][] blocks) {
-	    		this.blocks = blocks;
-	    	}
-	    	public Vector3f getPos() {
-				return pos;
-			}
-			public void setPos(Vector3f pos) {
-				this.pos = pos;
-			}
-			@Override
-			public String toString() {
-				return "ClumpMessage [id=" + id + ", size=" + size + ", blocks="
-						+ Arrays.toString(blocks) + "]";
-			}
-	    	 
-	    }
+	
 	}
 
 

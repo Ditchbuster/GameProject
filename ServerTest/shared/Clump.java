@@ -11,7 +11,7 @@ import com.jme3.math.Vector3f;
 public class Clump {
 	static AtomicInteger nextId = new AtomicInteger(); //used for creating a unique id
 	private int id;
-	static final int size = 3; // how many blocks are along axis ie 3 = 3x3x3
+	static final int size = 15; // how many blocks are along axis ie 3 = 3x3x3
 	
 	//int type; // type of the block; for now 0= air 1= solid
 	float x,y,z; //position data of the 0,0,0 child
