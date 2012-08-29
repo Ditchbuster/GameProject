@@ -66,8 +66,8 @@ public class SimpleClientTest extends SimpleApplication{
 	
 		try {
 			myClient = Network.connectToServer("localhost", 6143);
-			myClient.addMessageListener(new ChatHandler(), ChatMessage.class);
-			myClient.addMessageListener(new ClumpHandler(), ClumpMessage.class);
+			myClient.addMessageListener(new ChatHandler(), GameMessage.ChatMessage.class);
+			myClient.addMessageListener(new ClumpHandler(), GameMessage.ClumpMessage.class);
 			myClient.start();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -126,104 +126,15 @@ public class SimpleClientTest extends SimpleApplication{
 	public static void initializeClasses() {
         // Doing it here means that the client code only needs to
         // call our initialize. 
-        Serializer.registerClass(ChatMessage.class);
-        Serializer.registerClass(ClumpMessage.class);
+        Serializer.registerClass(GameMessage.ChatMessage.class);
+        Serializer.registerClass(GameMessage.ClumpMessage.class);
     }
-    
-    @Serializable
-    public static class ChatMessage extends AbstractMessage {
-
-        private String name;
-        private String message;
-
-        public ChatMessage() {
-        }
-
-        public ChatMessage(String name, String message) {
-            setName(name);
-            setMessage(message);
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setMessage(String s) {
-            this.message = s;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        public String toString() {
-            return name + ":" + message;
-        }
-    }
-    @Serializable
-    public static class ClumpMessage extends AbstractMessage {
-    	private int id;
-    	private int size;
-    	private int[][][] blocks;
-    	Vector3f pos;
-    	
-    	public ClumpMessage() {
-		}
-		public ClumpMessage(int id, int size,Vector3f pos, int[][][] blocks) {
-			this.id = id;
-			this.size = size;
-			this.blocks = blocks;
-			this.pos = pos;
-		}
-		public int getSize() {
-    		return size;
-    	}
-    	public void setSize(int size) {
-    		this.size = size;
-    	}
-    	public int getId() {
-    		return id;
-    	}
-    	public void setId(int id) {
-    		this.id = id;
-    	}
-    	public int[][][] getBlocks() {
-    		return blocks;
-    	}
-    	public void setBlocks(int[][][] blocks) {
-    		this.blocks = blocks;
-    	}
-		public Vector3f getPos() {
-			return pos;
-		}
-		public void setPos(Vector3f pos) {
-			this.pos = pos;
-		}
-		@Override
-		public String toString() {
-			String temp="";
-			for(int i=0; i<size;i++){
-				for(int j =0; j<size;j++){
-					for(int k =0; k<size;k++){
-						temp+=" "+blocks[i][j][k]; 
-					}
-					temp+=":";
-				}temp+=": ";
-			}
-			return "ClumpMessage [id=" + id + ", size=" + size + ", blocks="
-					+ temp + "]";
-		}
-    	 
-    }
+ 
     private class ChatHandler implements MessageListener<Client> {
 
         public void messageReceived(Client source, Message m) {
-        	if (m instanceof ChatMessage) {
-        	ChatMessage chat = (ChatMessage) m;
+        	if (m instanceof GameMessage.ChatMessage) {
+        		GameMessage.ChatMessage chat = (GameMessage.ChatMessage) m;
 
             System.out.println("Received:" + chat);
         	}
@@ -233,14 +144,14 @@ public class SimpleClientTest extends SimpleApplication{
     private class ClumpHandler implements MessageListener<Client> {
 
         public void messageReceived(Client source, Message m) {
-        	if (m instanceof ClumpMessage) {
-        		final ClumpMessage clump = (ClumpMessage) m;
+        	if (m instanceof GameMessage.ClumpMessage) {
+        		final GameMessage.ClumpMessage clump = (GameMessage.ClumpMessage) m;
         		enqueue(new Callable<Object>() {
 
         			public Object call() throws Exception {
 
         				Node temp = new Node(("Node "+String.valueOf(clump.getId())));
-        				fillNode(temp,new Clump(clump.getPos(),clump.blocks));
+        				fillNode(temp,new Clump(clump.getPos(),clump.getBlocks()));
         				rootNode.attachChild(temp);
         				return null;
         			}
