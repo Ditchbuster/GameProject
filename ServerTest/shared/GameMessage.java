@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import com.jme3.math.Vector3f;
@@ -86,4 +87,22 @@ public class GameMessage {
 			}
 	    	 
 	    }
+	 @Serializable
+	    public static class WorldMessage extends AbstractMessage {
+		 private ArrayList<Clump> world;
+
+		 public WorldMessage(){
+		 }
+		public WorldMessage(ArrayList<Clump> world) {
+			this.world = world;
+		}
+		
+		public ArrayList<Clump> getWorld() {
+			return world;
+		}
+		public void setWorld(ArrayList<Clump> world) {
+			this.world = world;
+		}
+		 
+	 }
 }
