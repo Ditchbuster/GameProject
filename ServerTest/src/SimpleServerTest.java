@@ -18,7 +18,7 @@ import com.jme3.network.serializing.Serializer;
 public class SimpleServerTest {
 	
 	//static WorldManager world = new WorldManager(Clump.type.RANDOM);
-	static WorldManager world = new WorldManager(9);
+	static WorldManager world = new WorldManager(257);
 	
 	
 	/**

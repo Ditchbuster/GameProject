@@ -1,5 +1,10 @@
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
+
+import javax.imageio.ImageIO;
 
 public class WorldManager {
 	private ArrayList<Clump> world; //list of all Clumps
@@ -46,15 +51,15 @@ public class WorldManager {
 		}*/
 
 		int total = 0;
-		total += wH[0][0] = ranGen.nextInt(50);
-		total += wH[0][size-1] = ranGen.nextInt(50);
-		total += wH[size-1][0] = ranGen.nextInt(50);
-		total += wH[size-1][size-1] = ranGen.nextInt(50);
+		total += wH[0][0] = ranGen.nextInt(250);
+		total += wH[0][size-1] = ranGen.nextInt(250);
+		total += wH[size-1][0] = ranGen.nextInt(250);
+		total += wH[size-1][size-1] = ranGen.nextInt(250);
 		wH[(size-1)/2][(size-1)/2]=total/4;
 
 
 		int side = (size-1)/2;
-		
+		int H = 250;
 		while(side>0){
 			boolean joffset=true;
 			int j = side;
@@ -79,7 +84,10 @@ public class WorldManager {
 						total+=wH[i-side][j]; //north
 						added++;
 					}
-					wH[i][j]=total/added; //average of the four points
+					total=(total/added)+ranGen.nextInt(2*H)-H; //average of the four points
+					if(total>250) total=250;
+					if(total<0) total=0;
+					wH[i][j]=total;
 					System.out.println(i+" "+j);
 					j+=2*side; //add twice the side to get to next midpoint
 				}
@@ -95,9 +103,17 @@ public class WorldManager {
 			}
 			if(side!=1){
 				side=side/2;
+				H=H/2;
+				if(H==0){
+					H=1;
+				}
+				System.out.println("H:"+H);
 				for(i=side;i<size;i+=side*2){
 					for(j=side;j<size;j+=side*2){
-						wH[i][j]=(wH[i+side][j+side]+wH[i-side][j+side]+wH[i-side][j-side]+wH[i+side][j-side])/4;
+						total=((wH[i+side][j+side]+wH[i-side][j+side]+wH[i-side][j-side]+wH[i+side][j-side])/4)+ranGen.nextInt(2*H)-H;
+						if(total>250) total=250;
+						if(total<0) total=0;
+						wH[i][j]=total;
 						System.out.println(i+":"+j);
 					}
 				}
@@ -106,11 +122,23 @@ public class WorldManager {
 			}
 
 		}
+		BufferedImage bi = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
 		for(int i=0;i<size;i++){
 			for(int j=0;j<size;j++){
 				System.out.print(wH[i][j]+" ");
+				int temp = wH[i][j];
+				if(temp<0)temp=0;
+				if(temp>255)temp=255;
+				bi.setRGB(i, j, temp+temp*256+temp*256*256);
 			}
+			
 			System.out.println(":");
+		}
+		try {
+			ImageIO.write(bi, "PNG", new File("C:\\cpearson\\yourImageName.PNG"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
