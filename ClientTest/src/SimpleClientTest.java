@@ -47,6 +47,8 @@ public class SimpleClientTest extends SimpleApplication{
 		FilterPostProcessor fpp=new FilterPostProcessor(assetManager);
 		fpp.addFilter(new CartoonEdgeFilter());
 		viewPort.addProcessor(fpp);
+		Vector3f temp = viewPort.getCamera().getLeft();
+		System.out.println("cam "+temp.getX()+" "+temp.getY()+" "+temp.getZ());
 		// TODO get settings from server so not hard coded
 		/*int size = 3;
 		this.twodworld = new Clump[size][size];
@@ -62,6 +64,7 @@ public class SimpleClientTest extends SimpleApplication{
 		this.assetManager.registerLocator("assets/", FileLocator.class);
 		viewPort.setBackgroundColor(new ColorRGBA(0.7f, 0.8f, 1f, 1f));		
 		flyCam.setMoveSpeed(50);
+	
 		
 	
 		try {
@@ -146,6 +149,7 @@ public class SimpleClientTest extends SimpleApplication{
         public void messageReceived(Client source, Message m) {
         	if (m instanceof GameMessage.ClumpMessage) {
         		final GameMessage.ClumpMessage clump = (GameMessage.ClumpMessage) m;
+        		System.out.println("Rec "+clump.getPos().getX()+" "+clump.getPos().getY()+" "+clump.getPos().getZ());
         		enqueue(new Callable<Object>() {
 
         			public Object call() throws Exception {

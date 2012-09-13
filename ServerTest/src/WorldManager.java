@@ -49,17 +49,17 @@ public class WorldManager {
 
 			}
 		}*/
-
+		int hight_max = 20;
 		int total = 0;
-		total += wH[0][0] = ranGen.nextInt(250);
-		total += wH[0][size-1] = ranGen.nextInt(250);
-		total += wH[size-1][0] = ranGen.nextInt(250);
-		total += wH[size-1][size-1] = ranGen.nextInt(250);
+		total += wH[0][0] = 10;//ranGen.nextInt(hight_max);
+		total += wH[0][size-1] = 10;//ranGen.nextInt(hight_max);
+		total += wH[size-1][0] = 10;//ranGen.nextInt(hight_max);
+		total += wH[size-1][size-1] = 10;//ranGen.nextInt(hight_max);
 		wH[(size-1)/2][(size-1)/2]=total/4;
 
 
 		int side = (size-1)/2;
-		int H = 250;
+		int H = hight_max/2;
 		while(side>0){
 			boolean joffset=true;
 			int j = side;
@@ -85,7 +85,7 @@ public class WorldManager {
 						added++;
 					}
 					total=(total/added)+ranGen.nextInt(2*H)-H; //average of the four points
-					if(total>250) total=250;
+					if(total>hight_max) total=hight_max;
 					if(total<0) total=0;
 					wH[i][j]=total;
 					System.out.println(i+" "+j);
@@ -111,7 +111,7 @@ public class WorldManager {
 				for(i=side;i<size;i+=side*2){
 					for(j=side;j<size;j+=side*2){
 						total=((wH[i+side][j+side]+wH[i-side][j+side]+wH[i-side][j-side]+wH[i+side][j-side])/4)+ranGen.nextInt(2*H)-H;
-						if(total>250) total=250;
+						if(total>hight_max) total=hight_max;
 						if(total<0) total=0;
 						wH[i][j]=total;
 						System.out.println(i+":"+j);
@@ -122,14 +122,39 @@ public class WorldManager {
 			}
 
 		}
+		
+		// Now create clumps.
+		int[][][]blocks;
+		for(int i=0;i<size;i+=Clump.size){
+			for(int j=0;j<size;j+=Clump.size){
+				for(int h = 0;h<=hight_max;h+=Clump.size){
+					blocks = new int[Clump.size][Clump.size][Clump.size];
+					for(int x=0;x<Clump.size&&x+i<size;x++){
+						for(int z=0;z<Clump.size&&z+j<size;z++){
+							for(int y=0;y<Clump.size;y++){
+								if(y+h<=wH[i+x][j+z]){
+									blocks[x][z][y]=1;
+								}else{
+									blocks[x][z][y]=0;
+								}
+							}
+						}
+					}
+					System.out.println("Adding clump at "+i+" "+j+" "+h);
+					world.add(new Clump(i,j,h,blocks));
+				}
+			}
+		}
+		
 		BufferedImage bi = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+		
 		for(int i=0;i<size;i++){
 			for(int j=0;j<size;j++){
 				System.out.print(wH[i][j]+" ");
-				int temp = wH[i][j];
+				int temp = wH[i][j]*255/hight_max;
 				if(temp<0)temp=0;
 				if(temp>255)temp=255;
-				bi.setRGB(i, j, temp+temp*256+temp*256*256);
+				bi.setRGB(i, j, (temp<<16+temp<<8));
 			}
 			
 			System.out.println(":");
@@ -141,7 +166,17 @@ public class WorldManager {
 			e.printStackTrace();
 		}
 	}
-
+	/**
+	 * Sets the block in that location to solid, dirty way right now
+	 * 
+	 * @param i
+	 * @param j
+	 * @param h
+	 */
+	private void setBlock(int i, int j, int h) {
+		
+		
+	}
 	public ArrayList<Clump> getWorld(){
 		return world;
 	}

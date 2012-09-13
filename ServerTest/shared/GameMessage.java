@@ -82,6 +82,7 @@ public class GameMessage {
 			}
 			@Override
 			public String toString() {
+				
 				return "ClumpMessage [id=" + id + ", size=" + size + ", blocks="
 						+ Arrays.toString(blocks) + "]";
 			}

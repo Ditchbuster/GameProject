@@ -28,7 +28,7 @@ public class SimpleServerTest {
 		
 	public static void main(String[] args) throws IOException
 	{
-		world.initWorld(Clump.type.RANDOM);
+		
 		Serializer.registerClass( GameMessage.ChatMessage.class);
 		Serializer.registerClass( GameMessage.ClumpMessage.class);
 		final Server Server = Network.createServer(6143);
