@@ -18,7 +18,7 @@ import com.jme3.scene.control.Control;
  *         Describes a cube of the world. This will be a certain 3d cube of blocks
  */
 public class WorldCube extends AbstractControl{
-	public static final int size = 5; // size of the cube in blocks
+	public static final int size = Clump.size; // size of the cube in blocks
 	public static final int width = 3; // world unit size of the block
 	private static final Vector3f[] vertices = new Vector3f[8];
 	{
@@ -69,9 +69,10 @@ public class WorldCube extends AbstractControl{
 	int[] Tlft = {2, 0, 1, 2, 1, 3};
 	int[] Trht = {2, 0, 3, 3, 0, 1};
 
-	CustomMesh myMesh = new CustomMesh(300);
+	CustomMesh myMesh = null;
 	CompoundCollisionShape geomShape = new CompoundCollisionShape();
-
+	private int[][][] blocks = null;
+	
 	class BlockIndex{ //for passing a blocks index around
 		public int x,y,z;
 	
@@ -84,9 +85,10 @@ public class WorldCube extends AbstractControl{
 			this.z=z;
 		}
 	}
-	private int[][][] blocks = new int[size][size][size];
+	
 
 	public WorldCube(int type) {
+		blocks = new int[size][size][size];
 		for (int x = 0; x < size; x++) {
 			for (int y = 0; y < size; y++) {
 				for (int z = 0; z < size; z++) {
@@ -94,6 +96,9 @@ public class WorldCube extends AbstractControl{
 				}
 			}
 		}
+	}
+	public WorldCube(int[][][] inBlocks){
+		blocks = inBlocks;
 	}
 	public WorldCube(){} // empty serialization constructor
 	

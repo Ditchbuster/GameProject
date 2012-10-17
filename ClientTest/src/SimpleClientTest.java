@@ -1,35 +1,58 @@
+
+
+
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.concurrent.Callable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Iterator;
+import java.util.Vector;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.plugins.FileLocator;
+import com.jme3.bullet.BulletAppState;
+import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
+import com.jme3.bullet.control.CharacterControl;
+import com.jme3.bullet.control.RigidBodyControl;
+import com.jme3.collision.CollisionResult;
+import com.jme3.collision.CollisionResults;
+import com.jme3.font.BitmapText;
+import com.jme3.input.KeyInput;
+import com.jme3.input.MouseInput;
+import com.jme3.input.controls.ActionListener;
+import com.jme3.input.controls.KeyTrigger;
+import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
-import com.jme3.network.AbstractMessage;
 import com.jme3.network.Client;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
 import com.jme3.network.Network;
-import com.jme3.network.serializing.Serializable;
 import com.jme3.network.serializing.Serializer;
 import com.jme3.post.FilterPostProcessor;
 import com.jme3.post.filters.CartoonEdgeFilter;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
+import com.jme3.scene.shape.Sphere;
 import com.jme3.system.JmeContext;
 
-public class SimpleClientTest extends SimpleApplication{
+public class SimpleClientTest extends SimpleApplication implements ActionListener{
+	boolean connectToServer = false;
 	/* Debug */
 	boolean d_wireframe = false;
 	
+	private Vector<Vector3f> addToWorld;
+	private WorldCube[][][] world;
+	int ind=0;
 	
-	public Clump [][] twodworld;
+	private BulletAppState bulletAppState;
+	private CharacterControl player;
+	Geometry mark;
+	private boolean left = false, right = false, up = false, down = false;
+	private Vector3f walkDirection = new Vector3f();
+	
+	
+	
 	/**
 	 * @param args
 	 */
@@ -43,21 +66,17 @@ public class SimpleClientTest extends SimpleApplication{
 	@Override
 	public void simpleInitApp() {
 		
+		addToWorld = new Vector<Vector3f>(10);
+		
 		//just for outlining boxes for testing
 		FilterPostProcessor fpp=new FilterPostProcessor(assetManager);
-		fpp.addFilter(new CartoonEdgeFilter());
+		//fpp.addFilter(new CartoonEdgeFilter());
 		viewPort.addProcessor(fpp);
 		Vector3f temp = viewPort.getCamera().getLeft();
 		System.out.println("cam "+temp.getX()+" "+temp.getY()+" "+temp.getZ());
-		// TODO get settings from server so not hard coded
-		/*int size = 3;
-		this.twodworld = new Clump[size][size];
-		for (int i=0;i<size;i++){
-			for (int j=0;j<size;j++){
-				twodworld[i][j]=new Clump(i,j,0);
-			}
-		}*/
 		
+		
+		world = new WorldCube[100][100][100];
 		
 		Client myClient = null;
 		initializeClasses();
@@ -66,7 +85,35 @@ public class SimpleClientTest extends SimpleApplication{
 		flyCam.setMoveSpeed(50);
 	
 		
-	
+		/** Set up Physics */
+		bulletAppState = new BulletAppState();
+		stateManager.attach(bulletAppState);
+		//bulletAppState.getPhysicsSpace().enableDebug(assetManager);
+		viewPort.setBackgroundColor(new ColorRGBA(0.7f, 0.8f, 1f, 1f));
+		flyCam.setMoveSpeed(100);
+		setUpKeys();
+		initMouse();
+		//setUpLight();
+		//initFloor();
+		//initCrossHairs();
+		initMark();
+
+		CapsuleCollisionShape capsuleShape = new CapsuleCollisionShape(1.5f, 6f, 1);
+		player = new CharacterControl(capsuleShape, 0.05f);
+		player.setJumpSpeed(20);
+		player.setFallSpeed(30);
+		player.setGravity(30);
+		player.setPhysicsLocation(new Vector3f(-10, 0, -10));
+
+		// We attach the scene and the player to the rootNode and the physics
+		// space,
+		// to make them appear in the game world.
+
+		bulletAppState.getPhysicsSpace().add(player);
+		
+		
+		
+		if(connectToServer){
 		try {
 			myClient = Network.connectToServer("localhost", 6143);
 			myClient.addMessageListener(new ChatHandler(), GameMessage.ChatMessage.class);
@@ -75,6 +122,31 @@ public class SimpleClientTest extends SimpleApplication{
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+		}
+		else{ //load world
+			int[][][] floorBlock = new int[Clump.size][Clump.size][Clump.size];
+			for(int x=0;x<Clump.size;x++){
+				for(int y=0;y<Clump.size;y++){
+					for(int z=0;z<Clump.size;z++)
+					if(z==0){
+						floorBlock[x][y][z]=0;
+					}
+					else{
+						floorBlock[x][y][z]=1;
+					}
+				}
+			}
+			for(int x=0;x<Clump.size;x++){
+				for(int z=0;z<Clump.size;z++){
+					
+						Vector3f index = new Vector3f(x,0,z);
+						WorldCube Wtemp = world[x][0][z] = new WorldCube(floorBlock);
+						Wtemp.generateMesh();
+						addToWorld.add(index);
+					
+				}
+			}
 		}
 		
 	}
@@ -122,8 +194,107 @@ public class SimpleClientTest extends SimpleApplication{
 		}
 		parent.setLocalTranslation(in.getPos()); // set the node offset in the world
 	}
+	private void initMouse() {
+		inputManager.addMapping("Shoot", new MouseButtonTrigger(MouseInput.BUTTON_LEFT),new KeyTrigger(KeyInput.KEY_RETURN)); // trigger 2: left-button click
+		inputManager.addListener(actionListener, "Shoot");
+	}
+	/** Defining the "Shoot" action: Determine what was hit and how to respond. */
+	private ActionListener actionListener = new ActionListener() {
+
+		public void onAction(String name, boolean keyPressed, float tpf) {
+			if (name.equals("Shoot") && !keyPressed) {
+				// 1. Reset results list.
+				CollisionResults results = new CollisionResults();
+				// 2. Aim the ray from cam loc to cam direction.
+				Ray ray = new Ray(cam.getLocation(), cam.getDirection());
+				// 3. Collect intersections between Ray and Shootables in results list.
+				rootNode.collideWith(ray, results);
+				// 4. Print the results
+				System.out.println("----- Collisions? " + results.size() + "-----");
+				for (int i = 0; i < results.size(); i++) {
+					// For each hit, we know distance, impact point, name of geometry.
+					float dist = results.getCollision(i).getDistance();
+					Vector3f pt = results.getCollision(i).getContactPoint();
+					String hit = results.getCollision(i).getGeometry().getName();
+					System.out.println("* Collision #" + i);
+					System.out.println("  You shot " + hit + " at " + pt + ", " + dist + " wu away.");
+				}
+				// 5. Use the results (we mark the hit object)
+				if (results.size() > 0) {
+					// The closest collision point is what was truly hit:
+					CollisionResult closest = results.getClosestCollision();
+					// Let's interact - we mark the hit with a red dot.
+					mark.setLocalTranslation(closest.getContactPoint());
+					Vector3f hitLoc = closest.getContactPoint();
+					System.out.println("hl x:" + hitLoc.x + "    y:" + hitLoc.y + "    z:" + hitLoc.z);
+					Vector3f hitGeom = closest.getGeometry().getLocalTranslation();
+					System.out.println("WC x:" + hitGeom.x + "    y:" + hitGeom.y + "    z:" + hitGeom.z);
+					Vector3f bInd = hitLoc.subtract(hitGeom);
+					closest.getGeometry().getControl(WorldCube.class).removeBlock(bInd);
+					closest.getGeometry().setMesh(closest.getGeometry().getControl(WorldCube.class).getMesh());
+					System.out.println("I  x:" + bInd.x + "    y:" +(bInd.y) + "    z:" + bInd.z);
+					rootNode.attachChild(mark);
+					Vector3f play = player.getPhysicsLocation();
+					System.out.println("Player -> x:" + Math.round(play.getX()) + "   y:" + Math.round(play.getY()) + "   z:" + Math.round(play.getZ()));
+				} else {
+					// No hits? Then remove the red mark.
+					rootNode.detachChild(mark);
+				}
+			}
+		}
+	};
 	
-	
+	private void setUpKeys() {
+		inputManager.addMapping("Left", new KeyTrigger(KeyInput.KEY_A));
+		inputManager.addMapping("Right", new KeyTrigger(KeyInput.KEY_D));
+		inputManager.addMapping("Up", new KeyTrigger(KeyInput.KEY_W));
+		inputManager.addMapping("Down", new KeyTrigger(KeyInput.KEY_S));
+		inputManager.addMapping("Jump", new KeyTrigger(KeyInput.KEY_SPACE));
+		inputManager.addListener(this, "Left");
+		inputManager.addListener(this, "Right");
+		inputManager.addListener(this, "Up");
+		inputManager.addListener(this, "Down");
+		inputManager.addListener(this, "Jump");
+	}
+	/** A red ball that marks the last spot that was "hit" by the "shot". */
+	protected void initMark() {
+		Sphere sphere = new Sphere(30, 30, 0.2f);
+		mark = new Geometry("BOOM!", sphere);
+		Material mark_mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+		mark_mat.setColor("Color", ColorRGBA.Red);
+		mark.setMaterial(mark_mat);
+	}
+
+	/** A centered plus sign to help the player aim. */
+	protected void initCrossHairs() {
+		// guiNode.detachAllChildren();
+		guiFont = assetManager.loadFont("Interface/Fonts/Default.fnt");
+		BitmapText ch = new BitmapText(guiFont, false);
+		ch.setSize(guiFont.getCharSet().getRenderedSize() * 2);
+		ch.setText("+"); // crosshairs
+		ch.setLocalTranslation( // center
+				settings.getWidth() / 2 - guiFont.getCharSet().getRenderedSize() / 3 * 2, settings.getHeight() / 2 + ch.getLineHeight() / 2, 0);
+		guiNode.attachChild(ch);
+	}
+
+	/**
+	 * These are our custom actions triggered by key presses. We do not walk
+	 * yet, we just keep track of the direction the user pressed.
+	 */
+	public void onAction(String binding, boolean value, float tpf) {
+		if (binding.equals("Left")) {
+			left = value;
+		} else if (binding.equals("Right")) {
+			right = value;
+		} else if (binding.equals("Up")) {
+			up = value;
+		} else if (binding.equals("Down")) {
+			down = value;
+		} else if (binding.equals("Jump")) {
+			player.jump();
+		}
+
+	}
 	/* ****************************************Server Shit***************************************/
 	
 	public static void initializeClasses() {
@@ -149,7 +320,11 @@ public class SimpleClientTest extends SimpleApplication{
         public void messageReceived(Client source, Message m) {
         	if (m instanceof GameMessage.ClumpMessage) {
         		final GameMessage.ClumpMessage clump = (GameMessage.ClumpMessage) m;
-        		System.out.println("Rec "+clump.getPos().getX()+" "+clump.getPos().getY()+" "+clump.getPos().getZ());
+        		Vector3f index = new Vector3f(clump.getPos());
+        		WorldCube Wtemp = world[(int) clump.getPos().getX()][(int) clump.getPos().getY()][(int) clump.getPos().getZ()] = new WorldCube(clump.getBlocks());
+        		Wtemp.generateMesh();
+        		addToWorld.add(index);
+        		/*System.out.println("Rec "+clump.getPos().getX()+" "+clump.getPos().getY()+" "+clump.getPos().getZ());
         		enqueue(new Callable<Object>() {
 
         			public Object call() throws Exception {
@@ -159,11 +334,48 @@ public class SimpleClientTest extends SimpleApplication{
         				rootNode.attachChild(temp);
         				return null;
         			}
-        		});
+        		});*/
         		System.out.println("Received:" + clump);
         	}
 
         }
     }
-
+    @Override
+	public void simpleUpdate(float tpf) {
+    	
+    	Vector3f camDir = cam.getDirection().clone().multLocal(0.6f);
+		Vector3f camLeft = cam.getLeft().clone().multLocal(0.4f);
+		walkDirection.set(0, 0, 0);
+		if (left) {
+			walkDirection.addLocal(camLeft);
+		}
+		if (right) {
+			walkDirection.addLocal(camLeft.negate());
+		}
+		if (up) {
+			walkDirection.addLocal(camDir);
+		}
+		if (down) {
+			walkDirection.addLocal(camDir.negate());
+		}
+		player.setWalkDirection(walkDirection);
+		cam.setLocation(player.getPhysicsLocation());
+    	
+    	while(ind<addToWorld.size()){ 
+    		Vector3f index = addToWorld.elementAt(ind++);
+    		WorldCube i= world[(int) index.getX()][(int) index.getY()][(int) index.getZ()];
+    		Geometry geom = new Geometry("fl"+i.hashCode(), i.getMesh());
+    		geom.addControl(i);
+    		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+    		mat.setColor("Color", ColorRGBA.randomColor());
+    		geom.setMaterial(mat);
+    		geom.setLocalTranslation(index.getX()*(WorldCube.size)*WorldCube.width, index.getY()*(WorldCube.size)*WorldCube.width, index.getZ()*(WorldCube.size)*WorldCube.width);
+    		rootNode.attachChild(geom);
+    		RigidBodyControl geom_phy = new RigidBodyControl(i.getCosShape(), 0.0f);
+    		geom.addControl(geom_phy);
+    		System.out.println("Adding clump");
+    		//bulletAppState.getPhysicsSpace().add(geom_phy);
+    	}
+    	
+    }
 }
