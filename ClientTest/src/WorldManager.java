@@ -2,26 +2,35 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
 
 public class WorldManager {
 	private ArrayList<Clump> world; //list of all Clumps
-
+	public LinkedList<Clump> changed; //list of all clumps that need to be updated. //TODO change back to private once done testing
 	/**
 	 * Currently inits a default flat area of a certain size
 	 */
 	public WorldManager() {
 		world = new ArrayList<Clump>(100); // init the list of clumps
+		changed = new LinkedList<Clump>();
 		initWorld(Clump.type.SOLID);
 	}
 	public WorldManager(Clump.type t){
 		world = new ArrayList<Clump>(100); // init the list of clumps
+		changed = new LinkedList<Clump>();
+		initWorld(t);
+	}
+	public WorldManager(int size, Clump.type t){
+		world = new ArrayList<Clump>(size*size); // init the list of clumps
+		changed = new LinkedList<Clump>();
 		initWorld(t);
 	}
 	public WorldManager(int size){
 		world = new ArrayList<Clump>(size*size);
+		changed = new LinkedList<Clump>();
 		algoGen(size);
 	}
 
@@ -31,7 +40,12 @@ public class WorldManager {
 			for(int i = 0; i< size;i++){
 				for(int j = 0; j< size;j++){
 					for(int k =0; k<size;k++){
-						world.add(new Clump(i*Clump.size,k*Clump.size,j*Clump.size,t)); //create clumps based on clump.type
+						//if(!(t==Clump.type.FLOOR&&j>0)){
+							Clump temp = new Clump(i*Clump.size,k*Clump.size,j*Clump.size,t);
+							temp.generateMesh();
+							world.add(temp); //create clumps based on clump.type
+							changed.add(temp);
+						//}
 					}
 				}
 			}
@@ -166,6 +180,12 @@ public class WorldManager {
 			e.printStackTrace();
 		}
 	}
+	
+	public boolean NeedUpdate() {
+		
+		return (changed.size()!=0);
+	}
+	
 	/**
 	 * Sets the block in that location to solid, dirty way right now
 	 * 
@@ -182,6 +202,14 @@ public class WorldManager {
 	}
 	public Clump getClump(int i){
 		return world.get(i);
+	}
+	public Clump getChanged(){ // not sync on linkedlist changed!! 
+		Clump temp = changed.poll();
+		if(temp==null){
+			System.out.println("Null pointer in Changed list"); //this should never happen as what calls this should check with NeedUpdate
+		}
+		
+		return (temp);
 	}
 
 }

@@ -12,4 +12,7 @@ public class Block {
 	public int getType(){
 		return type;
 	}
+	public void setType(int i) {
+		type = i;
+	}
 }
