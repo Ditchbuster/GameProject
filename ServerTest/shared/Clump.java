@@ -299,7 +299,7 @@ public class Clump extends AbstractControl{
 		for (int x = 0; x < size; x++) {
 			for (int y = 0; y < size; y++) {
 				for (int z = 0; z < size; z++) { // this z is up //TODO this z is not up anymore but no changes yet to code below
-					if (child[x][y][z].getType() != 0) {
+					if (child[x][z][y].getType() != 0) {
 						addedFace=false;
 						//System.out.println("Block: " + x + " " + y + " " + z);
 						temptype = 0; // default is to draw
@@ -312,7 +312,7 @@ public class Clump extends AbstractControl{
 								temptype = CubeTop.getBlock(x, y, 0).getType();
 
 							}
-						} else if (child[x][y][z + 1].getType() == 0) {// or if not on boundary check next cube;
+						} else if (child[x][z+1][y].getType() == 0) {// or if not on boundary check next cube;
 							temptype = 0;
 						} else {
 							temptype = 1;// dont draw
@@ -336,7 +336,7 @@ public class Clump extends AbstractControl{
 							} else { // else see if cube there
 								temptype = CubeBot.getBlock(x, y, size - 1).getType();
 							}
-						} else if (child[x][y][z - 1].getType() == 0) {// or if not on boundary check next cube;
+						} else if (child[x][z-1][y].getType() == 0) {// or if not on boundary check next cube;
 							temptype = 0;
 						} else {
 							temptype = 1;
@@ -355,7 +355,7 @@ public class Clump extends AbstractControl{
 							} else { // else see if cube there
 								temptype = CubeFrt.getBlock(size - 1, y, z).getType();
 							}
-						} else if (child[x - 1][y][z].getType() == 0) {// or if not on boundary check next cube;
+						} else if (child[x - 1][z][y].getType() == 0) {// or if not on boundary check next cube;
 							temptype = 0;
 						} else {
 							temptype = 1;
@@ -374,7 +374,7 @@ public class Clump extends AbstractControl{
 							} else { // else see if cube there
 								temptype = CubeBck.getBlock(0, y, z).getType();
 							}
-						} else if (child[x + 1][y][z].getType() == 0) {// or if not on boundary check next cube;
+						} else if (child[x + 1][z][y].getType() == 0) {// or if not on boundary check next cube;
 							temptype = 0;
 						} else {
 							temptype = 1;
@@ -393,7 +393,7 @@ public class Clump extends AbstractControl{
 							} else { // else see if cube there
 								temptype = CubeRht.getBlock(x, 0, z).getType();
 							}
-						} else if (child[x][y + 1][z].getType() == 0) {// or if not on boundary check next cube;
+						} else if (child[x][z][y+1].getType() == 0) {// or if not on boundary check next cube;
 							temptype = 0;
 						} else {
 							temptype = 1;
@@ -412,7 +412,7 @@ public class Clump extends AbstractControl{
 							} else { // else see if cube there
 								temptype = CubeLft.getBlock(x, size - 1, z).getType();
 							}
-						} else if (child[x][y - 1][z].getType() == 0) {// or if not on boundary check next cube;
+						} else if (child[x][z][y-1].getType() == 0) {// or if not on boundary check next cube;
 							temptype = 0;
 						} else {
 							temptype = 1;

@@ -42,13 +42,13 @@ public class SimpleClientTest extends SimpleApplication implements ActionListene
 	boolean d_wireframe = false;
 	
 	private Vector<Vector3f> addToWorld;
-	private WorldCube[][][] world;
+	private WorldManager world;
 	int ind=0;
 	
 	private BulletAppState bulletAppState;
 	private CharacterControl player;
 	Geometry mark;
-	private boolean left = false, right = false, up = false, down = false;
+	private boolean left = false, right = false, up = false, down = false, up_a = false, down_a = false;
 	private Vector3f walkDirection = new Vector3f();
 	
 	
@@ -69,20 +69,21 @@ public class SimpleClientTest extends SimpleApplication implements ActionListene
 		addToWorld = new Vector<Vector3f>(10);
 		
 		//just for outlining boxes for testing
-		FilterPostProcessor fpp=new FilterPostProcessor(assetManager);
+		//FilterPostProcessor fpp=new FilterPostProcessor(assetManager);
 		//fpp.addFilter(new CartoonEdgeFilter());
-		viewPort.addProcessor(fpp);
+		//viewPort.addProcessor(fpp);
+		
 		Vector3f temp = viewPort.getCamera().getLeft();
 		System.out.println("cam "+temp.getX()+" "+temp.getY()+" "+temp.getZ());
 		
 		
-		world = new WorldCube[100][100][100];
+		world = new WorldManager(15,Clump.type.FLOOR);
 		
 		Client myClient = null;
 		initializeClasses();
 		this.assetManager.registerLocator("assets/", FileLocator.class);
 		viewPort.setBackgroundColor(new ColorRGBA(0.7f, 0.8f, 1f, 1f));		
-		flyCam.setMoveSpeed(50);
+		flyCam.setMoveSpeed(100);
 	
 		
 		/** Set up Physics */
@@ -90,20 +91,20 @@ public class SimpleClientTest extends SimpleApplication implements ActionListene
 		stateManager.attach(bulletAppState);
 		//bulletAppState.getPhysicsSpace().enableDebug(assetManager);
 		viewPort.setBackgroundColor(new ColorRGBA(0.7f, 0.8f, 1f, 1f));
-		flyCam.setMoveSpeed(100);
+		
 		setUpKeys();
 		initMouse();
 		//setUpLight();
 		//initFloor();
-		//initCrossHairs();
+		initCrossHairs();
 		initMark();
 
 		CapsuleCollisionShape capsuleShape = new CapsuleCollisionShape(1.5f, 6f, 1);
 		player = new CharacterControl(capsuleShape, 0.05f);
 		player.setJumpSpeed(20);
-		player.setFallSpeed(30);
+		player.setFallSpeed(0);
 		player.setGravity(30);
-		player.setPhysicsLocation(new Vector3f(-10, 0, -10));
+		player.setPhysicsLocation(new Vector3f(-10, 10, -10));
 
 		// We attach the scene and the player to the rootNode and the physics
 		// space,
@@ -124,30 +125,7 @@ public class SimpleClientTest extends SimpleApplication implements ActionListene
 			e.printStackTrace();
 		}
 		}
-		else{ //load world
-			int[][][] floorBlock = new int[Clump.size][Clump.size][Clump.size];
-			for(int x=0;x<Clump.size;x++){
-				for(int y=0;y<Clump.size;y++){
-					for(int z=0;z<Clump.size;z++)
-					if(z==0){
-						floorBlock[x][y][z]=0;
-					}
-					else{
-						floorBlock[x][y][z]=1;
-					}
-				}
-			}
-			for(int x=0;x<Clump.size;x++){
-				for(int z=0;z<Clump.size;z++){
-					
-						Vector3f index = new Vector3f(x,0,z);
-						WorldCube Wtemp = world[x][0][z] = new WorldCube(floorBlock);
-						Wtemp.generateMesh();
-						addToWorld.add(index);
-					
-				}
-			}
-		}
+		
 		
 	}
 	@Override
@@ -230,8 +208,9 @@ public class SimpleClientTest extends SimpleApplication implements ActionListene
 					Vector3f hitGeom = closest.getGeometry().getLocalTranslation();
 					System.out.println("WC x:" + hitGeom.x + "    y:" + hitGeom.y + "    z:" + hitGeom.z);
 					Vector3f bInd = hitLoc.subtract(hitGeom);
-					closest.getGeometry().getControl(WorldCube.class).removeBlock(bInd);
-					closest.getGeometry().setMesh(closest.getGeometry().getControl(WorldCube.class).getMesh());
+					//TODO remove block
+					//closest.getGeometry().getControl(WorldCube.class).removeBlock(bInd);
+					//closest.getGeometry().setMesh(closest.getGeometry().getControl(WorldCube.class).getMesh());
 					System.out.println("I  x:" + bInd.x + "    y:" +(bInd.y) + "    z:" + bInd.z);
 					rootNode.attachChild(mark);
 					Vector3f play = player.getPhysicsLocation();
@@ -249,12 +228,18 @@ public class SimpleClientTest extends SimpleApplication implements ActionListene
 		inputManager.addMapping("Right", new KeyTrigger(KeyInput.KEY_D));
 		inputManager.addMapping("Up", new KeyTrigger(KeyInput.KEY_W));
 		inputManager.addMapping("Down", new KeyTrigger(KeyInput.KEY_S));
+		inputManager.addMapping("Up_actual", new KeyTrigger(KeyInput.KEY_Q));
+		inputManager.addMapping("Down_actual", new KeyTrigger(KeyInput.KEY_Z));
 		inputManager.addMapping("Jump", new KeyTrigger(KeyInput.KEY_SPACE));
+		inputManager.addMapping("Toggle Gravity", new KeyTrigger(KeyInput.KEY_G));
 		inputManager.addListener(this, "Left");
 		inputManager.addListener(this, "Right");
 		inputManager.addListener(this, "Up");
 		inputManager.addListener(this, "Down");
+		inputManager.addListener(this, "Up_actual");
+		inputManager.addListener(this, "Down_actual");
 		inputManager.addListener(this, "Jump");
+		inputManager.addListener(this, "Toggle Gravity");
 	}
 	/** A red ball that marks the last spot that was "hit" by the "shot". */
 	protected void initMark() {
@@ -290,8 +275,17 @@ public class SimpleClientTest extends SimpleApplication implements ActionListene
 			up = value;
 		} else if (binding.equals("Down")) {
 			down = value;
-		} else if (binding.equals("Jump")) {
+		}else if (binding.equals("Down_actual")) {
+			down_a = value;
+		}else if (binding.equals("Up_actual")) {
+			up_a = value;
+		}else if (binding.equals("Jump")) {
 			player.jump();
+		} else if (binding.equals("Toggle Gravity")) {
+			if(player.getGravity()==0)
+			player.setGravity(30);
+			else
+			player.setGravity(0);
 		}
 
 	}
@@ -319,12 +313,13 @@ public class SimpleClientTest extends SimpleApplication implements ActionListene
 
         public void messageReceived(Client source, Message m) {
         	if (m instanceof GameMessage.ClumpMessage) {
+        		/*      *********** Disabled for client branch *****************
         		final GameMessage.ClumpMessage clump = (GameMessage.ClumpMessage) m;
         		Vector3f index = new Vector3f(clump.getPos());
         		WorldCube Wtemp = world[(int) clump.getPos().getX()][(int) clump.getPos().getY()][(int) clump.getPos().getZ()] = new WorldCube(clump.getBlocks());
         		Wtemp.generateMesh();
         		addToWorld.add(index);
-        		/*System.out.println("Rec "+clump.getPos().getX()+" "+clump.getPos().getY()+" "+clump.getPos().getZ());
+        		System.out.println("Rec "+clump.getPos().getX()+" "+clump.getPos().getY()+" "+clump.getPos().getZ());
         		enqueue(new Callable<Object>() {
 
         			public Object call() throws Exception {
@@ -335,7 +330,7 @@ public class SimpleClientTest extends SimpleApplication implements ActionListene
         				return null;
         			}
         		});*/
-        		System.out.println("Received:" + clump);
+        		System.out.println("Received");
         	}
 
         }
@@ -358,23 +353,33 @@ public class SimpleClientTest extends SimpleApplication implements ActionListene
 		if (down) {
 			walkDirection.addLocal(camDir.negate());
 		}
+		if (up_a) {
+			walkDirection.addLocal(camDir.cross(camLeft));
+		}
+		if (down_a) {
+			walkDirection.addLocal(camDir.negate().cross(camLeft));
+		}
 		player.setWalkDirection(walkDirection);
 		cam.setLocation(player.getPhysicsLocation());
     	
-    	while(ind<addToWorld.size()){ 
-    		Vector3f index = addToWorld.elementAt(ind++);
-    		WorldCube i= world[(int) index.getX()][(int) index.getY()][(int) index.getZ()];
+    	while(world.NeedUpdate()){ 
+    		
+    		Clump i= world.getChanged();
+    		if(i==null){
+    			System.out.println("Shit this shouldnt happen!");
+    			break;
+    		}
     		Geometry geom = new Geometry("fl"+i.hashCode(), i.getMesh());
     		geom.addControl(i);
     		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
     		mat.setColor("Color", ColorRGBA.randomColor());
     		geom.setMaterial(mat);
-    		geom.setLocalTranslation(index.getX()*(WorldCube.size)*WorldCube.width, index.getY()*(WorldCube.size)*WorldCube.width, index.getZ()*(WorldCube.size)*WorldCube.width);
+    		geom.setLocalTranslation(i.getPos().getX()*Clump.width, i.getPos().getY()*Clump.width, i.getPos().getZ()*Clump.width);
     		rootNode.attachChild(geom);
     		RigidBodyControl geom_phy = new RigidBodyControl(i.getCosShape(), 0.0f);
     		geom.addControl(geom_phy);
     		System.out.println("Adding clump");
-    		//bulletAppState.getPhysicsSpace().add(geom_phy);
+    		bulletAppState.getPhysicsSpace().add(geom_phy);
     	}
     	
     }

@@ -10,6 +10,7 @@ import javax.imageio.ImageIO;
 public class WorldManager {
 	private ArrayList<Clump> world; //list of all Clumps
 	public LinkedList<Clump> changed; //list of all clumps that need to be updated. //TODO change back to private once done testing
+	
 	/**
 	 * Currently inits a default flat area of a certain size
 	 */
@@ -26,26 +27,28 @@ public class WorldManager {
 	public WorldManager(int size, Clump.type t){
 		world = new ArrayList<Clump>(size*size); // init the list of clumps
 		changed = new LinkedList<Clump>();
-		initWorld(t);
+		initWorld(size,t);
 	}
 	public WorldManager(int size){
 		world = new ArrayList<Clump>(size*size);
 		changed = new LinkedList<Clump>();
 		algoGen(size);
 	}
-
-	public void initWorld(Clump.type t) { // TODO change back to private once testing done
+	public void initWorld(Clump.type t){ //wrapper
+		initWorld(4,t);
+	}
+	public void initWorld(int size, Clump.type t) { // TODO change back to private once testing done
 		if(t!=Clump.type.NULL){
-			int size = 4; //how many clumps in each x and y to go
+			//int size = 4; //how many clumps in each x and y to go
 			for(int i = 0; i< size;i++){
 				for(int j = 0; j< size;j++){
 					for(int k =0; k<size;k++){
-						//if(!(t==Clump.type.FLOOR&&j>0)){
-							Clump temp = new Clump(i*Clump.size,k*Clump.size,j*Clump.size,t);
+						if(!(t==Clump.type.FLOOR&&j>0)){
+							Clump temp = new Clump(i*(Clump.size),j*(Clump.size),k*(Clump.size),t);
 							temp.generateMesh();
 							world.add(temp); //create clumps based on clump.type
 							changed.add(temp);
-						//}
+						}
 					}
 				}
 			}
