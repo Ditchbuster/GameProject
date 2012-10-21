@@ -45,7 +45,6 @@ public class WorldManager {
 					for(int k =0; k<size;k++){
 						if(!(t==Clump.type.FLOOR&&j>0)){
 							Clump temp = new Clump(i*(Clump.size),j*(Clump.size),k*(Clump.size),t);
-							temp.generateMesh();
 							world.add(temp); //create clumps based on clump.type
 							changed.add(temp);
 						}

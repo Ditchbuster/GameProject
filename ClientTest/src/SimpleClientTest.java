@@ -77,7 +77,7 @@ public class SimpleClientTest extends SimpleApplication implements ActionListene
 		System.out.println("cam "+temp.getX()+" "+temp.getY()+" "+temp.getZ());
 		
 		
-		world = new WorldManager(15,Clump.type.FLOOR);
+		world = new WorldManager(1,Clump.type.FLOOR);
 		
 		Client myClient = null;
 		initializeClasses();
@@ -89,7 +89,7 @@ public class SimpleClientTest extends SimpleApplication implements ActionListene
 		/** Set up Physics */
 		bulletAppState = new BulletAppState();
 		stateManager.attach(bulletAppState);
-		//bulletAppState.getPhysicsSpace().enableDebug(assetManager);
+		bulletAppState.getPhysicsSpace().enableDebug(assetManager);
 		viewPort.setBackgroundColor(new ColorRGBA(0.7f, 0.8f, 1f, 1f));
 		
 		setUpKeys();
@@ -369,7 +369,8 @@ public class SimpleClientTest extends SimpleApplication implements ActionListene
     			System.out.println("Shit this shouldnt happen!");
     			break;
     		}
-    		Geometry geom = new Geometry("fl"+i.hashCode(), i.getMesh());
+    		
+    		Geometry geom = new Geometry("fl"+i.hashCode(), i.generateMesh());
     		geom.addControl(i);
     		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
     		mat.setColor("Color", ColorRGBA.randomColor());
