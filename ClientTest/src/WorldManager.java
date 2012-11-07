@@ -10,7 +10,7 @@ import javax.imageio.ImageIO;
 public class WorldManager {
 	private ArrayList<Clump> world; //list of all Clumps
 	public LinkedList<Clump> changed; //list of all clumps that need to be updated. //TODO change back to private once done testing
-	
+
 	/**
 	 * Currently inits a default flat area of a certain size
 	 */
@@ -55,9 +55,12 @@ public class WorldManager {
 	}
 	/**
 	 * Generate a world with a more fluid look
-	 * @param size is the length of one size of the world needs to be power of 2 +1
+	 * @param size is the length of one side of the world needs to be power of 2 +1 if it is not it will default to 9;
 	 */
 	public void algoGen(int size){
+		if( !(((size-1)!=0) && ((size-1)&(size-2))==0)){ // check power of 2
+			size=9; //TODO make to closest power of 2 +1 instead of default
+		}
 		int[][] wH = new int[size][size];
 		Random ranGen = new Random();
 		/*for(int i=0;i<size;i++){
@@ -138,7 +141,7 @@ public class WorldManager {
 			}
 
 		}
-		
+
 		// Now create clumps.
 		int[][][]blocks;
 		for(int i=0;i<size;i+=Clump.size){
@@ -149,21 +152,23 @@ public class WorldManager {
 						for(int z=0;z<Clump.size&&z+j<size;z++){
 							for(int y=0;y<Clump.size;y++){
 								if(y+h<=wH[i+x][j+z]){
-									blocks[x][z][y]=1;
+									blocks[x][y][z]=1;
 								}else{
-									blocks[x][z][y]=0;
+									blocks[x][y][z]=0;
 								}
 							}
 						}
 					}
 					System.out.println("Adding clump at "+i+" "+j+" "+h);
-					world.add(new Clump(i,h,j,blocks)); //swapping axis because of jme has 2 index as up
+					Clump temp = new Clump(i,h,j,blocks);
+					world.add(temp); //swapping axis because of jme has 2 index as up
+					changed.add(temp);
 				}
 			}
 		}
-		
+
 		BufferedImage bi = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
-		
+
 		for(int i=0;i<size;i++){
 			for(int j=0;j<size;j++){
 				System.out.print(wH[i][j]+" ");
@@ -172,7 +177,7 @@ public class WorldManager {
 				if(temp>255)temp=255;
 				bi.setRGB(i, j, (temp<<16+temp<<8));
 			}
-			
+
 			System.out.println(":");
 		}
 		try {
@@ -182,12 +187,13 @@ public class WorldManager {
 			e.printStackTrace();
 		}
 	}
-	
+
+
 	public boolean NeedUpdate() {
-		
+
 		return (changed.size()!=0);
 	}
-	
+
 	/**
 	 * Sets the block in that location to solid, dirty way right now
 	 * 
@@ -196,8 +202,8 @@ public class WorldManager {
 	 * @param h
 	 */
 	private void setBlock(int i, int j, int h) {
-		
-		
+
+
 	}
 	public ArrayList<Clump> getWorld(){
 		return world;
@@ -210,7 +216,7 @@ public class WorldManager {
 		if(temp==null){
 			System.out.println("Null pointer in Changed list"); //this should never happen as what calls this should check with NeedUpdate
 		}
-		
+
 		return (temp);
 	}
 

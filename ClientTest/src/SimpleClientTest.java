@@ -77,7 +77,8 @@ public class SimpleClientTest extends SimpleApplication implements ActionListene
 		System.out.println("cam "+temp.getX()+" "+temp.getY()+" "+temp.getZ());
 		
 		
-		world = new WorldManager(1,Clump.type.FLOOR);
+		//world = new WorldManager(2,Clump.type.RANDOM);
+		world = new WorldManager(65);
 		
 		Client myClient = null;
 		initializeClasses();

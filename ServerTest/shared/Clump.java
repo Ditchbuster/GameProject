@@ -336,7 +336,10 @@ public class Clump extends AbstractControl{
 				for(int y=0; y<size; y++){
 					for(int z=0; z<size; z++){
 						if(child[x][y][z].getType()!=0){ // if block is solid then check to see if need to draw faces.
+							boolean addedFace = false; //if a face is added then add physics block at end
 							// ****** FRONT *********
+							if(x==0||(x!=0 && child[x-1][y][z].getType()==0)) // TODO check next clump and this logic for the other faces
+							{
 							indices[i++]=((x*(size+1)*(size+1))+(y*(size+1))+z);
 							indices[i++]=((x*(size+1)*(size+1))+(y*(size+1))+(z+1));
 							indices[i++]=((x*(size+1)*(size+1))+((y+1)*(size+1))+z);
@@ -344,8 +347,11 @@ public class Clump extends AbstractControl{
 							indices[i++]=((x*(size+1)*(size+1))+(y*(size+1))+(z+1));
 							indices[i++]=((x*(size+1)*(size+1))+((y+1)*(size+1))+(z+1));
 							indices[i++]=((x*(size+1)*(size+1))+((y+1)*(size+1))+z);
-							
+							addedFace=true;
+							}
 							// ****** LEFT *********
+							if(z==0||(z!=0 && child[x][y][z-1].getType()==0)) 
+							{
 							indices[i++]=((x*(size+1)*(size+1))+(y*(size+1))+z);
 							indices[i++]=((x*(size+1)*(size+1))+((y+1)*(size+1))+z);
 							indices[i++]=(((x+1)*(size+1)*(size+1))+(y*(size+1))+z);
@@ -353,8 +359,11 @@ public class Clump extends AbstractControl{
 							indices[i++]=(((x+1)*(size+1)*(size+1))+(y*(size+1))+z);
 							indices[i++]=((x*(size+1)*(size+1))+((y+1)*(size+1))+z);
 							indices[i++]=(((x+1)*(size+1)*(size+1))+((y+1)*(size+1))+z);
-							
+							addedFace=true;
+							}
 							// ***** RIGHT *******
+							if(z==Clump.size-1||(z!=Clump.size-1 && child[x][y][z+1].getType()==0)) 
+							{
 							indices[i++]=((x*(size+1)*(size+1))+(y*(size+1))+(z+1));
 							indices[i++]=(((x+1)*(size+1)*(size+1))+(y*(size+1))+(z+1));
 							indices[i++]=((x*(size+1)*(size+1))+((y+1)*(size+1))+(z+1));
@@ -362,8 +371,11 @@ public class Clump extends AbstractControl{
 							indices[i++]=((x*(size+1)*(size+1))+((y+1)*(size+1))+(z+1));
 							indices[i++]=(((x+1)*(size+1)*(size+1))+(y*(size+1))+(z+1));
 							indices[i++]=(((x+1)*(size+1)*(size+1))+((y+1)*(size+1))+(z+1));
-							
+							addedFace=true;
+							}
 							// ***** BACK *******
+							if(x==Clump.size-1||(x!=Clump.size-1 && child[x+1][y][z].getType()==0)) 
+							{
 							indices[i++]=(((x+1)*(size+1)*(size+1))+(y*(size+1))+(z+1));
 							indices[i++]=(((x+1)*(size+1)*(size+1))+(y*(size+1))+(z));
 							indices[i++]=(((x+1)*(size+1)*(size+1))+((y+1)*(size+1))+(z+1));
@@ -371,8 +383,11 @@ public class Clump extends AbstractControl{
 							indices[i++]=(((x+1)*(size+1)*(size+1))+((y+1)*(size+1))+(z+1));
 							indices[i++]=(((x+1)*(size+1)*(size+1))+(y*(size+1))+(z));
 							indices[i++]=(((x+1)*(size+1)*(size+1))+((y+1)*(size+1))+(z));
-							
+							addedFace=true;
+							}
 							// ***** TOP ********
+							if(y==Clump.size-1||(y!=Clump.size-1 && child[x][y+1][z].getType()==0)) 
+							{
 							indices[i++]=((x*(size+1)*(size+1))+((y+1)*(size+1))+(z));
 							indices[i++]=(((x)*(size+1)*(size+1))+((y+1)*(size+1))+(z+1));
 							indices[i++]=(((x+1)*(size+1)*(size+1))+((y+1)*(size+1))+(z+1));
@@ -380,8 +395,11 @@ public class Clump extends AbstractControl{
 							indices[i++]=((x*(size+1)*(size+1))+((y+1)*(size+1))+(z));
 							indices[i++]=(((x+1)*(size+1)*(size+1))+((y+1)*(size+1))+(z+1));
 							indices[i++]=(((x+1)*(size+1)*(size+1))+((y+1)*(size+1))+(z));
-							
+							addedFace=true;
+							}
 							// ***** BOTTOM *****
+							if(y==0||(y!=Clump.size-1 && child[x][y-1][z].getType()==0)) 
+							{
 							indices[i++]=((x*(size+1)*(size+1))+((y)*(size+1))+(z));
 							indices[i++]=(((x+1)*(size+1)*(size+1))+((y)*(size+1))+(z+1));
 							indices[i++]=(((x)*(size+1)*(size+1))+((y)*(size+1))+(z+1));
@@ -389,7 +407,13 @@ public class Clump extends AbstractControl{
 							indices[i++]=((x*(size+1)*(size+1))+((y)*(size+1))+(z));
 							indices[i++]=(((x+1)*(size+1)*(size+1))+((y)*(size+1))+(z));
 							indices[i++]=(((x+1)*(size+1)*(size+1))+((y)*(size+1))+(z+1));
-							
+							addedFace=true;
+							}
+							// ***** Physics **** // TODO make physics more like visual faces above
+							if(addedFace){
+							Vector3f box_size = new Vector3f(1.5f, 1.5f, 1.5f); // half size of box also used to offset box
+							geomShape.addChildShape(new BoxCollisionShape(box_size), box_size.add(x * width, y * width, z * width));
+							}
 						}
 					}
 				}
