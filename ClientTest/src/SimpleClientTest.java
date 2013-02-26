@@ -43,6 +43,7 @@ public class SimpleClientTest extends SimpleApplication implements ActionListene
 	
 	private Vector<Vector3f> addToWorld;
 	private WorldManager world;
+	private Node ClumpNode;
 	int ind=0;
 	
 	private BulletAppState bulletAppState;
@@ -65,7 +66,8 @@ public class SimpleClientTest extends SimpleApplication implements ActionListene
 
 	@Override
 	public void simpleInitApp() {
-		
+		ClumpNode = new Node("Clumps");
+		rootNode.attachChild(ClumpNode);
 		addToWorld = new Vector<Vector3f>(10);
 		
 		//just for outlining boxes for testing
@@ -90,7 +92,7 @@ public class SimpleClientTest extends SimpleApplication implements ActionListene
 		/** Set up Physics */
 		bulletAppState = new BulletAppState();
 		stateManager.attach(bulletAppState);
-		bulletAppState.getPhysicsSpace().enableDebug(assetManager);
+		//bulletAppState.getPhysicsSpace().enableDebug(assetManager);
 		viewPort.setBackgroundColor(new ColorRGBA(0.7f, 0.8f, 1f, 1f));
 		
 		setUpKeys();
@@ -112,6 +114,30 @@ public class SimpleClientTest extends SimpleApplication implements ActionListene
 		// to make them appear in the game world.
 
 		bulletAppState.getPhysicsSpace().add(player);
+		
+		
+		
+		
+		while(world.NeedUpdate()){ //add all the clumps and geo to the world
+    		
+    		Clump i= world.getChanged();
+    		if(i==null){
+    			System.out.println("Shit this shouldnt happen!");
+    			break;
+    		}
+    		
+    		Geometry geom = new Geometry("fl"+i.hashCode(), i.generateMesh());
+    		geom.addControl(i);
+    		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+    		mat.setColor("Color", ColorRGBA.randomColor());
+    		geom.setMaterial(mat);
+    		geom.setLocalTranslation(i.getPos().getX()*Clump.width, i.getPos().getY()*Clump.width, i.getPos().getZ()*Clump.width);
+    		ClumpNode.attachChild(geom);
+    		RigidBodyControl geom_phy = new RigidBodyControl(i.getCosShape(), 0.0f);
+    		geom.addControl(geom_phy);
+    		System.out.println("Adding clump");
+    		bulletAppState.getPhysicsSpace().add(geom_phy);
+    	}
 		
 		
 		
@@ -187,7 +213,7 @@ public class SimpleClientTest extends SimpleApplication implements ActionListene
 				// 2. Aim the ray from cam loc to cam direction.
 				Ray ray = new Ray(cam.getLocation(), cam.getDirection());
 				// 3. Collect intersections between Ray and Shootables in results list.
-				rootNode.collideWith(ray, results);
+				ClumpNode.collideWith(ray, results);
 				// 4. Print the results
 				System.out.println("----- Collisions? " + results.size() + "-----");
 				for (int i = 0; i < results.size(); i++) {
@@ -209,10 +235,12 @@ public class SimpleClientTest extends SimpleApplication implements ActionListene
 					Vector3f hitGeom = closest.getGeometry().getLocalTranslation();
 					System.out.println("WC x:" + hitGeom.x + "    y:" + hitGeom.y + "    z:" + hitGeom.z);
 					Vector3f bInd = hitLoc.subtract(hitGeom);
-					//TODO remove block
-					//closest.getGeometry().getControl(WorldCube.class).removeBlock(bInd);
-					//closest.getGeometry().setMesh(closest.getGeometry().getControl(WorldCube.class).getMesh());
 					System.out.println("I  x:" + bInd.x + "    y:" +(bInd.y) + "    z:" + bInd.z);
+					//TODO remove block
+					Clump hitClump = closest.getGeometry().getControl(Clump.class); //get the clump hit
+					hitClump.removeBlock(bInd); //remove block and generate new mesh
+					world.changed.add(hitClump); //add to list to be updated
+					
 					rootNode.attachChild(mark);
 					Vector3f play = player.getPhysicsLocation();
 					System.out.println("Player -> x:" + Math.round(play.getX()) + "   y:" + Math.round(play.getY()) + "   z:" + Math.round(play.getZ()));
@@ -371,17 +399,6 @@ public class SimpleClientTest extends SimpleApplication implements ActionListene
     			break;
     		}
     		
-    		Geometry geom = new Geometry("fl"+i.hashCode(), i.generateMesh());
-    		geom.addControl(i);
-    		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-    		mat.setColor("Color", ColorRGBA.randomColor());
-    		geom.setMaterial(mat);
-    		geom.setLocalTranslation(i.getPos().getX()*Clump.width, i.getPos().getY()*Clump.width, i.getPos().getZ()*Clump.width);
-    		rootNode.attachChild(geom);
-    		RigidBodyControl geom_phy = new RigidBodyControl(i.getCosShape(), 0.0f);
-    		geom.addControl(geom_phy);
-    		System.out.println("Adding clump");
-    		bulletAppState.getPhysicsSpace().add(geom_phy);
     	}
     	
     }

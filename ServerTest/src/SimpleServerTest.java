@@ -1,14 +1,16 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.jme3.math.Vector3f;
-import com.jme3.network.*;
-import com.jme3.network.serializing.Serializable;
+import com.jme3.network.ConnectionListener;
+import com.jme3.network.HostedConnection;
+import com.jme3.network.Message;
+import com.jme3.network.MessageListener;
+import com.jme3.network.Network;
+import com.jme3.network.Server;
 import com.jme3.network.serializing.Serializer;
 
 
@@ -18,7 +20,7 @@ import com.jme3.network.serializing.Serializer;
 public class SimpleServerTest {
 	
 	//static WorldManager world = new WorldManager(Clump.type.RANDOM);
-	static WorldManager world = new WorldManager(257);
+	static WorldManager world = new WorldManager(9);
 	
 	
 	/**
@@ -83,7 +85,7 @@ public class SimpleServerTest {
 				 for(int i=0; i<Clump.size;i++){
 					 for(int j =0; j<Clump.size;j++){
 						 for(int k =0; k<Clump.size;k++){
-							 blocks[i][j][k] = temp.getBlock(i, j, k).getType();
+							 blocks[i][k][j] = temp.getBlock(i, j, k).getType(); //swapping axis cause jme is ffed up
 
 						 }
 					 }

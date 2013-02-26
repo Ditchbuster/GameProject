@@ -20,6 +20,10 @@ public class WorldManager {
 		world = new ArrayList<Clump>(100); // init the list of clumps
 		initWorld(t);
 	}
+	public WorldManager(int size, Clump.type t){
+		world = new ArrayList<Clump>(size*size); // init the list of clumps
+		initWorld(t);
+	}
 	public WorldManager(int size){
 		world = new ArrayList<Clump>(size*size);
 		algoGen(size);
@@ -31,7 +35,10 @@ public class WorldManager {
 			for(int i = 0; i< size;i++){
 				for(int j = 0; j< size;j++){
 					for(int k =0; k<size;k++){
-						world.add(new Clump(i*Clump.size,k*Clump.size,j*Clump.size,t)); //create clumps based on clump.type
+						if(!(t==Clump.type.FLOOR&&j>0)){
+							world.add(new Clump(i*Clump.size,k*Clump.size,j*Clump.size,t)); //create clumps based on clump.type
+
+						}
 					}
 				}
 			}
@@ -141,7 +148,7 @@ public class WorldManager {
 						}
 					}
 					System.out.println("Adding clump at "+i+" "+j+" "+h);
-					world.add(new Clump(i,j,h,blocks));
+					world.add(new Clump(i,h,j,blocks)); //swapping axis because of jme has 2 index as up
 				}
 			}
 		}

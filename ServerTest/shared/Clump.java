@@ -31,7 +31,7 @@ public class Clump extends AbstractControl{
 	static final int size = 9; // how many blocks are along axis ie 3 = 3x3x3
 	
 	//int type; // type of the block; for now 0= air 1= solid
-	float x,y,z; //position data of the 0,0,0 child
+	float x,y,z; //position data of the 0,0,0 child based on blocks not actual float cords in scene
 	Block[][][] child;
 	public static enum type {
 		RANDOM,SOLID,AIR,NULL,FLOOR;
@@ -93,7 +93,7 @@ public class Clump extends AbstractControl{
 	int[] Tlft = {2, 0, 1, 2, 1, 3};
 	int[] Trht = {2, 0, 3, 3, 0, 1};
 
-	CustomMesh myMesh = null;
+	
 	CompoundCollisionShape geomShape = new CompoundCollisionShape();
 	
 	@Override
@@ -281,13 +281,14 @@ public class Clump extends AbstractControl{
 	}
 	
 	public void removeBlock(Vector3f hitloc){
+		hitloc = getBlockInd(hitloc);
 		int x = (int)hitloc.getX();
 		int y = (int)hitloc.getY();
 		int z = (int)hitloc.getZ();
-		child[x][y][z].setType(1); // for now set != 0
+		child[x][y][z].setType(0);
 		generateMesh();
-		//update other cubes if touching
-		if(x==size-1&&CubeBck!=null){
+		//TODO: update other cubes if touching 
+		/*if(x==size-1&&CubeBck!=null){
 			CubeBck.generateMesh();
 		}
 		if(y==size-1&&CubeRht!=null){
@@ -304,7 +305,7 @@ public class Clump extends AbstractControl{
 		}
 		if(z==0&&CubeBot!=null){
 			CubeBot.generateMesh();
-		}
+		}*/
 		
 	}
 	/**
@@ -326,7 +327,7 @@ public class Clump extends AbstractControl{
 				mesh.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(vertices));
 				System.out.println("New mesh in catch");
 			}
-			if(mesh == null){
+			if(mesh == null){ // if no mesh create a new one
 				mesh = new Mesh();
 				mesh.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(vertices));
 			}
@@ -420,10 +421,13 @@ public class Clump extends AbstractControl{
 				mesh.setBuffer(Type.Index, 3, BufferUtils.createIntBuffer(indices));
 			}
 			mesh.updateBound();
+			mesh.setStatic();
 		}
 		return(mesh);
 	}
-	
+	public void checkEdges(){
+		
+	}
 // ****************************************Old code
 //	public void generateMesh() {// TODO: bulk transfer the boundary chunks blocks, optimize physics (panels, only for areas around player)
 //		//myMesh.setDynamic();
@@ -590,10 +594,7 @@ public class Clump extends AbstractControl{
 		
 		return new Vector3f(x,y,z);
 	}
-	public CustomMesh getMesh() {
-
-		return (myMesh);
-	}
+	
 	public CompoundCollisionShape getCosShape() {
 
 		return (geomShape);
