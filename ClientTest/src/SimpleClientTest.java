@@ -2,7 +2,6 @@
 
 
 import com.jme3.app.SimpleApplication;
-import com.jme3.font.BitmapText;
 import com.jme3.input.FlyByCamera;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
@@ -30,6 +29,7 @@ public class SimpleClientTest extends SimpleApplication {
 	public void simpleInitApp() {
 		myGame = new GameAppState();
 		stateManager.attach(myGame);
+		//myGame.setEnabled(false);
 		
 	}
 	@Override

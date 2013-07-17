@@ -43,7 +43,7 @@ public class GameAppState extends AbstractAppState implements ActionListener{
 	/* Debug */
 	boolean d_wireframe = false;
 	
-	private Vector<Vector3f> addToWorld;
+	
 	private WorldManager world;
 	private Node ClumpNode;
 	int ind=0;
@@ -73,7 +73,7 @@ public class GameAppState extends AbstractAppState implements ActionListener{
 		
 		ClumpNode = new Node("Clumps");
 		rootNode.attachChild(ClumpNode);
-		addToWorld = new Vector<Vector3f>(10);
+		
 		
 		//just for outlining boxes for testing
 		//FilterPostProcessor fpp=new FilterPostProcessor(assetManager);
@@ -85,7 +85,7 @@ public class GameAppState extends AbstractAppState implements ActionListener{
 		
 		
 		//world = new WorldManager(2,Clump.type.RANDOM);
-		world = new WorldManager(65);
+		world = new WorldManager(33); //change the size, passing the length of one side, with algogen it needs to be (x^2)+1
 		
 		app.getAssetManager().registerLocator("assets/", FileLocator.class);
 		viewPort.setBackgroundColor(new ColorRGBA(0.7f, 0.8f, 1f, 1f));		
@@ -95,7 +95,7 @@ public class GameAppState extends AbstractAppState implements ActionListener{
 		/** Set up Physics */
 		bulletAppState = new BulletAppState();
 		stateManager.attach(bulletAppState);
-		//bulletAppState.getPhysicsSpace().enableDebug(assetManager);
+		bulletAppState.getPhysicsSpace().enableDebug(assetManager);
 		viewPort.setBackgroundColor(new ColorRGBA(0.7f, 0.8f, 1f, 1f));
 		
 		setUpKeys();
