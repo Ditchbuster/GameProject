@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" path="shared"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="lib" path="C:/Programming/jME3/lib/eventbus.jar"/>
 	<classpathentry kind="lib" path="C:/Programming/jME3/lib/jbullet.jar"/>
 	<classpathentry kind="lib" path="C:/Programming/jME3/lib/jinput.jar"/>
 	<classpathentry kind="lib" path="C:/Programming/jME3/lib/jME3-blender.jar"/>
-	<classpathentry kind="lib" path="C:/Programming/jME3/lib/jME3-core.jar"/>
+	<classpathentry kind="lib" path="C:/Programming/jME3/lib/jME3-core.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Programming/jME3/javadoc/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="C:/Programming/jME3/lib/jME3-desktop.jar"/>
 	<classpathentry kind="lib" path="C:/Programming/jME3/lib/jME3-effects.jar"/>
 	<classpathentry kind="lib" path="C:/Programming/jME3/lib/jME3-jbullet.jar"/>
