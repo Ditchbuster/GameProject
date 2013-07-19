@@ -95,7 +95,9 @@ public class GameAppState extends AbstractAppState implements ActionListener{
 		/** Set up Physics */
 		bulletAppState = new BulletAppState();
 		stateManager.attach(bulletAppState);
-		bulletAppState.getPhysicsSpace().enableDebug(assetManager);
+		//bulletAppState.getPhysicsSpace().enableDebug(assetManager);
+		
+		
 		viewPort.setBackgroundColor(new ColorRGBA(0.7f, 0.8f, 1f, 1f));
 		
 		setUpKeys();

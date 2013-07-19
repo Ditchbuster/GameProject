@@ -1,12 +1,7 @@
-import java.util.LinkedList;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.jme3.bullet.collision.shapes.BoxCollisionShape;
-import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
-import com.jme3.bullet.collision.shapes.PlaneCollisionShape;
-import com.jme3.bullet.collision.shapes.SimplexCollisionShape;
-import com.jme3.math.Plane;
+import com.jme3.bullet.collision.shapes.MeshCollisionShape;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
@@ -14,7 +9,6 @@ import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Spatial;
-import com.jme3.scene.VertexBuffer;
 import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.scene.control.AbstractControl;
 import com.jme3.scene.control.Control;
@@ -94,7 +88,7 @@ public class Clump extends AbstractControl{
 	int[] Trht = {2, 0, 3, 3, 0, 1};
 
 	
-	CompoundCollisionShape geomShape = new CompoundCollisionShape();
+	MeshCollisionShape geomShape;
 	
 	@Override
 	  public void setSpatial(Spatial spatial) { // init routine
@@ -254,7 +248,7 @@ public class Clump extends AbstractControl{
 			if(x>=size){
 				x=size-1;
 			}
-			if(child[x][z][y].getType()!=0){
+			if(child[x][y][z].getType()==0){
 				x=x-1;
 			}
 		}
@@ -263,7 +257,7 @@ public class Clump extends AbstractControl{
 			if(y>=size){
 				y=size-1;
 			}
-			if(child[x][z][y].getType()!=0){
+			if(child[x][y][z].getType()==0){
 				y=y-1;
 			}
 		}
@@ -272,12 +266,12 @@ public class Clump extends AbstractControl{
 			if(z>=size){
 				z=size-1;
 			}
-			if(child[x][z][y].getType()!=0){
+			if(child[x][y][z].getType()==0){
 				z=z-1;
 			}
 		}
-		System.out.println("X:"+x+"  Y:"+y+"  Z:"+z+" = blocks["+x+"]["+z+"]["+y+"]");
-		return(new Vector3f(x,z,y)); // swapped because of different axis
+		System.out.println("X:"+x+"  Y:"+y+"  Z:"+z+" = child["+x+"]["+y+"]["+z+"]");
+		return(new Vector3f(x,y,z)); // swapped because of different axis
 	}
 	
 	public void removeBlock(Vector3f hitloc){
@@ -285,6 +279,7 @@ public class Clump extends AbstractControl{
 		int x = (int)hitloc.getX();
 		int y = (int)hitloc.getY();
 		int z = (int)hitloc.getZ();
+		
 		child[x][y][z].setType(0);
 		generateMesh();
 		//TODO: update other cubes if touching 
@@ -317,22 +312,23 @@ public class Clump extends AbstractControl{
 		if(child==null){
 			System.out.println("block data is not initilized");
 		}else{ // calc the mesh
-
 			try {
-				mesh = ((Geometry) spatial).getMesh(); //in case this somehow isnt a geometry?
+				if(spatial!=null){	
+					mesh=((Geometry) spatial).getMesh();
+				}else{
+					mesh = new Mesh();
+					mesh.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(vertices));	
+				}
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
+
 				e.printStackTrace();
-				mesh = new Mesh();
-				mesh.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(vertices));
-				System.out.println("New mesh in catch");
+				System.out.println("Catch block in generateMesh");
 			}
-			if(mesh == null){ // if no mesh create a new one
-				mesh = new Mesh();
-				mesh.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(vertices));
-			}
+			
 			int[] indices = new int[size*size*size*36]; //TODO need better storage
 			int i=0;
+			Vector3f box_size = new Vector3f(1.5f, 1.5f, 1.5f);
 			for(int x=0; x<size ; x++){
 				for(int y=0; y<size; y++){
 					for(int z=0; z<size; z++){
@@ -349,6 +345,7 @@ public class Clump extends AbstractControl{
 							indices[i++]=((x*(size+1)*(size+1))+((y+1)*(size+1))+(z+1));
 							indices[i++]=((x*(size+1)*(size+1))+((y+1)*(size+1))+z);
 							addedFace=true;
+							
 							}
 							// ****** LEFT *********
 							if(z==0||(z!=0 && child[x][y][z-1].getType()==0)) 
@@ -412,8 +409,9 @@ public class Clump extends AbstractControl{
 							}
 							// ***** Physics **** // TODO make physics more like visual faces above
 							if(addedFace){
-							Vector3f box_size = new Vector3f(1.5f, 1.5f, 1.5f); // half size of box also used to offset box
-							geomShape.addChildShape(new BoxCollisionShape(box_size), box_size.add(x * width, y * width, z * width));
+							//Vector3f box_size = new Vector3f(1.5f, 1.5f, 1.5f); // half size of box also used to offset box
+							//geomShape.addChildShape(new BoxCollisionShape(box_size), box_size.add(x * width, y * width, z * width)); // creates shape out of boxes. inculdes sides that are not visible
+							//geomShape.addChildShape(new SimplexCollisionShape(new Vector3f(0,0,0),new Vector3f(0,width,0),new Vector3f(0,width,width),new Vector3f(0,0,width)), box_size.add(x * width, y * width, z * width));
 							}
 						}
 					}
@@ -422,6 +420,7 @@ public class Clump extends AbstractControl{
 			}
 			mesh.updateBound();
 			mesh.setStatic();
+			geomShape = new MeshCollisionShape(mesh);
 		}
 		return(mesh);
 	}
@@ -595,7 +594,7 @@ public class Clump extends AbstractControl{
 		return new Vector3f(x,y,z);
 	}
 	
-	public CompoundCollisionShape getCosShape() {
+	public MeshCollisionShape getCosShape() {
 
 		return (geomShape);
 	}
